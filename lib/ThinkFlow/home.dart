@@ -134,7 +134,7 @@ class HomePageScreen extends StatelessWidget {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: const Color.fromARGB(255, 196, 18, 18),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
