@@ -2,30 +2,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class ReviewPage extends StatefulWidget {
-    final String courseId;
-  
-  ReviewPage({required this.courseId});
+  final String courseId;
+
+  ReviewPage({super.key, required this.courseId});
 
   @override
   _ReviewPageState createState() => _ReviewPageState();
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  TextEditingController _reviewController = TextEditingController();
-   double _rating = 0.0;
+  final TextEditingController _reviewController = TextEditingController();
+  double _rating = 0.0;
   String courseName = "";
   String category = "";
   String? imageUrl;
-   @override
+  @override
   void initState() {
     super.initState();
     _fetchCourseData();
   }
+
   Future<void> _fetchCourseData() async {
-    var courseDoc = await FirebaseFirestore.instance.collection("courses").doc(widget.courseId).get();
+    var courseDoc = await FirebaseFirestore.instance
+        .collection("courses")
+        .doc(widget.courseId)
+        .get();
     if (courseDoc.exists) {
       setState(() {
         courseName = courseDoc["name"];
@@ -34,18 +40,22 @@ class _ReviewPageState extends State<ReviewPage> {
       });
     }
   }
-   Future<Map<String, dynamic>?> _getUserDetails() async {
+
+  Future<Map<String, dynamic>?> _getUserDetails() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
       if (userDoc.exists) {
         return userDoc.data() as Map<String, dynamic>?;
       }
     }
     return null;
   }
- Future<void> _submitReview() async {
+
+  Future<void> _submitReview() async {
     String reviewText = _reviewController.text.trim();
     if (reviewText.isNotEmpty) {
       Map<String, dynamic>? userDetails = await _getUserDetails();
@@ -56,9 +66,10 @@ class _ReviewPageState extends State<ReviewPage> {
           'category': category,
           'userName': userDetails['name'] ?? 'Anonymous',
           'userProfile': userDetails['profileimg'] ?? '',
+          'userId': userDetails['uid'],
           'review': reviewText,
           'rating': _rating,
-          'timestamp': FieldValue.serverTimestamp() ,
+          'timestamp': FieldValue.serverTimestamp(),
           'likes': 0,
         });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,19 +82,22 @@ class _ReviewPageState extends State<ReviewPage> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: themeProvider.textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Write a Review",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: themeProvider.textColor),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
       ),
       body: Padding(
@@ -106,12 +120,12 @@ class _ReviewPageState extends State<ReviewPage> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: imageUrl != null ? Colors.transparent : Colors.black,
+                      color:
+                          imageUrl != null ? Colors.transparent : Colors.black,
                       borderRadius: BorderRadius.circular(8),
                       image: imageUrl != null
                           ? DecorationImage(
-                              image: NetworkImage(imageUrl!),
-                              fit: BoxFit.cover)
+                              image: NetworkImage(imageUrl!), fit: BoxFit.cover)
                           : null,
                     ),
                   ),
@@ -131,8 +145,9 @@ class _ReviewPageState extends State<ReviewPage> {
                 ],
               ),
             ),
-             SizedBox(height: 20),
-            Text("Rate this Course", style: TextStyle(fontSize: 16)),
+            SizedBox(height: 20),
+            Text("Rate this Course",
+                style: TextStyle(fontSize: 16, color: themeProvider.textColor)),
             SizedBox(height: 8),
             RatingBar.builder(
               initialRating: _rating,
@@ -141,10 +156,11 @@ class _ReviewPageState extends State<ReviewPage> {
               allowHalfRating: true,
               itemCount: 5,
               itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-              itemBuilder: (context, _) => Icon(
-                Icons.star,
-                color: Colors.amber,
-              ),
+              itemBuilder: (context, _) =>
+                  Icon(Icons.star, color: Colors.amber),
+              unratedColor: themeProvider.isDarkMode
+                  ? Colors.grey[700]
+                  : Colors.grey[400],
               onRatingUpdate: (rating) {
                 setState(() {
                   _rating = rating;
@@ -152,23 +168,35 @@ class _ReviewPageState extends State<ReviewPage> {
               },
             ),
             SizedBox(height: 20),
-            Text("Write your Review", style: TextStyle(fontSize: 16)),
+            Text("Write your Review",
+                style: TextStyle(fontSize: 16, color: themeProvider.textColor)),
             SizedBox(height: 8),
             TextFormField(
               controller: _reviewController,
               maxLength: 500,
               maxLines: 5,
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
+                fillColor: themeProvider.isDarkMode
+                    ? Colors.grey[800]
+                    : Colors.grey[200],
+                filled: true,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
             SizedBox(height: 20),
-            Center(child:GestureDetector(onTap: _submitReview,
-              child: buildContinueButton("Submit", context)))
+            Center(
+                child: GestureDetector(
+              onTap: () {
+                _submitReview();
+                Navigator.pop(context);
+              },
+              child: buildContinueButton("Submit", context),
+            ))
           ],
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: themeProvider.backgroundColor,
     );
   }
 }

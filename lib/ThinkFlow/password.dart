@@ -8,7 +8,7 @@ import 'package:thinkflow/ThinkFlow/widgets.dart';
 class PasswordScreen extends StatefulWidget {
   final Map<String, dynamic> userDetails;
 
-  PasswordScreen({required this.userDetails});
+  const PasswordScreen({super.key, required this.userDetails});
 
   @override
   _PasswordScreenState createState() => _PasswordScreenState();
@@ -104,15 +104,15 @@ class _PasswordScreenState extends State<PasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFCFAF8),
+      backgroundColor: const Color(0xFFFCFAF8),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Create a Password',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
@@ -122,27 +122,27 @@ class _PasswordScreenState extends State<PasswordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Create a Strong Password to Make Your\nAccount more Secure',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.black54),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             _buildPasswordField(
                 _passwordController, "Password", _obscurePassword, () {
               setState(() {
                 _obscurePassword = !_obscurePassword;
               });
             }),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildPasswordField(_confirmPasswordController,
                 "Confirm your Password", _obscureConfirmPassword, () {
               setState(() {
                 _obscureConfirmPassword = !_obscureConfirmPassword;
               });
             }),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Center(
               child: GestureDetector(
                 onTap: _submitPassword,
@@ -158,7 +158,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
   Widget _buildPasswordField(TextEditingController controller, String label,
       bool obscure, VoidCallback toggleVisibility) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextFormField(
         controller: controller,
         obscureText: obscure,
@@ -166,12 +166,12 @@ class _PasswordScreenState extends State<PasswordScreen> {
           filled: true,
           fillColor: Colors.white,
           labelText: label,
-          labelStyle: TextStyle(color: Colors.black54, fontSize: 14),
+          labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          prefixIcon: Icon(Icons.lock, color: Colors.grey),
+          prefixIcon: const Icon(Icons.lock, color: Colors.grey),
           suffixIcon: IconButton(
             icon: Icon(obscure ? Icons.visibility_off : Icons.visibility,
                 color: Colors.grey),

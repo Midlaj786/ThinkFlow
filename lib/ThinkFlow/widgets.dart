@@ -23,7 +23,7 @@ Widget buildContinueButton(String text, BuildContext context) {
         Center(
           child: Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -35,11 +35,11 @@ Widget buildContinueButton(String text, BuildContext context) {
           child: Container(
             width: 35,
             height: 35,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.arrow_forward,
               color: Colors.orange,
             ),

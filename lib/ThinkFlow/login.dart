@@ -9,6 +9,8 @@ import 'package:thinkflow/ThinkFlow/signUp.dart';
 import 'widgets.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -31,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print('33333333#############');
       if (result != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login Successful!")),
+          const SnackBar(content: Text("Login Successful!")),
         );
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => MainScreen()));
@@ -47,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     String? result = await _authService.signInWithGoogle();
     if (result == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Google Sign-In Successful!")),
+        const SnackBar(content: Text("Google Sign-In Successful!")),
       );
       Navigator.push(
           context, MaterialPageRoute(builder: (context) => MainScreen()));
@@ -61,10 +63,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFCFAF8),
+      backgroundColor: const Color(0xFFFCFAF8),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Row(
+        title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.language, color: Colors.orange, size: 30),
@@ -87,15 +89,15 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 "Getting Started.!",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.email, color: Colors.black54),
+                  prefixIcon: const Icon(Icons.email, color: Colors.black54),
                   hintText: "Email",
                   filled: true,
                   fillColor: Colors.grey[200],
@@ -105,12 +107,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.lock, color: Colors.black54),
+                  prefixIcon: const Icon(Icons.lock, color: Colors.black54),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
@@ -133,15 +135,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               GestureDetector(
                   onTap: () {
                     _handleLogin();
                   },
                   child: buildContinueButton("Continue", context)),
-              SizedBox(height: 20),
-              Text("Or Continue With", style: TextStyle(color: Colors.black54)),
-              SizedBox(height: 15),
+              const SizedBox(height: 20),
+              const Text("Or Continue With",
+                  style: TextStyle(color: Colors.black54)),
+              const SizedBox(height: 15),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -150,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onTap: () {
                       _handleGoogleLogin();
                     },
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       radius: 22,
                       backgroundColor: Colors.white,
                       child: Icon(
@@ -160,15 +163,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
 
                   GestureDetector(
                     onTap: () {
-                      // deleteCollection('users');
-                      // deleteCollection('courses');
+                      fetchUserData();
+                      // deleteAllMessages();
+                      // deleteCollection('chats');
+                      // deleteCollection('messages');
                       // deleteCollection("mentors");
                     },
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       radius: 22,
                       backgroundColor: Colors.blue,
                       child: Icon(
@@ -180,11 +185,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an Account? "),
+                  const Text("Don't have an Account? "),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -192,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           MaterialPageRoute(
                               builder: (context) => SignupScreen()));
                     },
-                    child: Text(
+                    child: const Text(
                       "SIGN UP",
                       style: TextStyle(
                         color: Colors.blue,
@@ -210,6 +215,33 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
+Future<void> deleteAllMessages() async {
+  CollectionReference messagesCollection =
+      FirebaseFirestore.instance.collection('messages');
+
+  QuerySnapshot messagesSnapshot = await messagesCollection.get();
+
+  for (DocumentSnapshot chatDoc in messagesSnapshot.docs) {
+    String chatId = chatDoc.id;
+
+    // Delete all messages inside each chatId's "chats" subcollection
+    CollectionReference chatMessagesRef =
+        messagesCollection.doc(chatId).collection('chats');
+    QuerySnapshot chatMessagesSnapshot = await chatMessagesRef.get();
+
+    for (DocumentSnapshot messageDoc in chatMessagesSnapshot.docs) {
+      await messageDoc.reference.delete();
+    }
+
+    // Delete the chatId document itself
+    await chatDoc.reference.delete();
+  }
+
+  print("🔥 Messages collection deleted successfully!");
+}
+
+// Call this function to delete all messages
+
 Future<void> deleteCollection(String collectionPath) async {
   var collection = FirebaseFirestore.instance.collection(collectionPath);
 
@@ -219,4 +251,19 @@ Future<void> deleteCollection(String collectionPath) async {
   }
 
   print("Collection '$collectionPath' deleted successfully.");
+}
+
+void fetchUserData() async {
+  String userId = FirebaseAuth.instance.currentUser!.uid;
+
+  DocumentSnapshot userDoc = await FirebaseFirestore.instance
+      .collection('users') // Adjust collection name if different
+      .doc(userId)
+      .get();
+
+  if (userDoc.exists) {
+    print("User Data: ${userDoc.data()}"); // ✅ Check if data is retrieved
+  } else {
+    print("No user data found"); // ❌ Indicates missing data in Firestore
+  }
 }

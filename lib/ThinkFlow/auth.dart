@@ -19,6 +19,7 @@ class AuthService {
     } catch (e) {
       print(e); // Return error message
     }
+    return null;
   }
 
   // Sign Up with Email & Password and Save Details
@@ -91,6 +92,7 @@ class AuthService {
     } catch (e) {
       print(e); // Return error message
     }
+    return null;
   }
 
   // Google Sign-In

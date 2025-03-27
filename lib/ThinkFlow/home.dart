@@ -1,37 +1,80 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Theme.dart';
+import 'package:thinkflow/ThinkFlow/administration/admin.dart';
 import 'package:thinkflow/ThinkFlow/course.dart';
 import 'package:thinkflow/ThinkFlow/courseuplode.dart';
 import 'package:thinkflow/ThinkFlow/llll.dart';
+import 'package:thinkflow/ThinkFlow/login.dart';
 import 'package:thinkflow/ThinkFlow/mentor.dart';
 import 'package:thinkflow/ThinkFlow/mentprof.dart';
 // import 'package:thinkflow/ThinkFlow/all_courses.dart'; // Add a page for displaying all courses
 
-class HomePageScreen extends StatelessWidget {
+class HomePageScreen extends StatefulWidget {
+  HomePageScreen({super.key});
+
+  @override
+  State<HomePageScreen> createState() => _HomePageScreenState();
+}
+
+class _HomePageScreenState extends State<HomePageScreen> {
+  String selectedCategory = "All";
+  late Future<List<String>> categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    categoriesFuture = _fetchCategories();
+  }
+
+  Future<List<String>> _fetchCategories() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('courses').get();
+
+    Set<String> fetchedCategories = {};
+    for (var doc in snapshot.docs) {
+      String category = doc['category'] ?? 'Unknown';
+      fetchedCategories.add(category);
+    }
+    return ["All", ...fetchedCategories];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      drawer: _buildDrawer(context),
-      appBar: _buildAppBar(),
+      backgroundColor: themeProvider.backgroundColor,
+      drawer: _buildDrawer(context, themeProvider),
+      appBar: _buildAppBar(themeProvider),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSearchBar(),
-              SizedBox(height: 16),
-              _buildBanner(),
-              SizedBox(height: 16),
-              _buildSectionTitle('Popular Courses', context),
-              _buildCategoryChips(),
-              SizedBox(height: 16),
-              _buildCoursesList(),
-              SizedBox(height: 16),
-              _buildSectionTitle('Top Mentors', context),
-              _buildMentorsList(),
+              _buildSearchBar(themeProvider),
+              const SizedBox(height: 16),
+              _buildBanner(themeProvider),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Popular Courses', context, themeProvider),
+              FutureBuilder<List<String>>(
+                future: categoriesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  if (!snapshot.hasData) return const SizedBox();
+                  return _buildCategoryChips(snapshot.data!, themeProvider);
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildCoursesList(themeProvider),
+              const SizedBox(height: 16),
+              _buildSectionTitle('Top Mentors', context, themeProvider),
+              _buildMentorsList(themeProvider),
             ],
           ),
         ),
@@ -39,13 +82,17 @@ class HomePageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title, BuildContext context) {
+  Widget _buildSectionTitle(
+      String title, BuildContext context, ThemeProvider themeProvider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: themeProvider.textColor),
         ),
         GestureDetector(
           onTap: () {
@@ -67,7 +114,7 @@ class HomePageScreen extends StatelessWidget {
             //   MaterialPageRoute(builder: (context) => AllCoursesPage()), // Navigate to all courses page
             // );
           },
-          child: Text(
+          child: const Text(
             'SEE ALL',
             style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
           ),
@@ -76,44 +123,64 @@ class HomePageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(BuildContext context, ThemeProvider themeProvider) {
+    String? uid = FirebaseAuth.instance.currentUser?.uid;
     return Drawer(
+      backgroundColor: themeProvider.backgroundColor,
       child: Column(
         children: [
           ListTile(
-            title: Text("Become a Mentor"),
+            title: Text("Become a Mentor",
+                style: TextStyle(color: themeProvider.textColor)),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MentorLoginPage()),
+                MaterialPageRoute(
+                    builder: (context) => const MentorLoginPage()),
               );
             },
           ),
           ListTile(
-            title: Text("Courses"),
+            title: Text("Courses",
+                style: TextStyle(color: themeProvider.textColor)),
             onTap: () {
+              fetchUserData();
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Courseuplode()),
+                MaterialPageRoute(builder: (context) => CourseUpload()),
               );
             },
           ),
+          if (uid == "xq149ozD79fnsZcdOqY07u5F3lB2") // Check if UID matches
+            ListTile(
+              title: Text("Admin Page",
+                  style: TextStyle(
+                      color: themeProvider.textColor,
+                      fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdminPage()),
+                );
+              },
+            ),
         ],
       ),
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(ThemeProvider themeProvider) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: themeProvider.backgroundColor.withOpacity(0.9),
       elevation: 0,
       actions: [
         Padding(
-          padding: EdgeInsets.all(8.0),
-          child: CircleAvatar(backgroundColor: Colors.black, radius: 16),
+          padding: const EdgeInsets.all(8.0),
+          child: CircleAvatar(
+              backgroundColor: themeProvider.textColor, radius: 16),
         ),
       ],
-      title: Row(
+      title: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.language, color: Colors.orange, size: 30),
@@ -131,57 +198,75 @@ class HomePageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(ThemeProvider themeProvider) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: themeProvider.textColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: TextField(
         decoration: InputDecoration(
           hintText: 'Search for ...',
+          hintStyle: TextStyle(color: themeProvider.textColor.withOpacity(0.6)),
           border: InputBorder.none,
-          suffixIcon: Icon(Icons.search, color: Colors.orange),
+          suffixIcon: const Icon(Icons.search, color: Colors.orange),
         ),
       ),
     );
   }
 
-  Widget _buildBanner() {
+  Widget _buildBanner(ThemeProvider themeProvider) {
     return Container(
       height: 200,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.black,
+        color: themeProvider.textColor.withOpacity(0.1),
       ),
     );
   }
 
-  Widget _buildCategoryChips() {
-    return Row(
-      children: [
-        Chip(label: Text('All')),
-        SizedBox(width: 8),
-        Chip(
-            label:
-                Text('Graphic Design', style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.green),
-        SizedBox(width: 8),
-        Chip(label: Text('Web Development')),
-      ],
+  Widget _buildCategoryChips(
+      List<String> categories, ThemeProvider themeProvider) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories.map((category) {
+          bool isSelected = category == selectedCategory;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              label: Text(category),
+              selected: isSelected,
+              selectedColor: Colors.orange,
+              onSelected: (bool selected) {
+                setState(() => selectedCategory = category);
+              },
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
-  Widget _buildCoursesList() {
-    return Container(
+  Widget _buildCoursesList(ThemeProvider themeProvider) {
+    return SizedBox(
       height: 250,
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('courses').snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Center(child: CircularProgressIndicator());
-          var courses = snapshot.data!.docs;
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          var courses = snapshot.data!.docs
+              .where((course) =>
+                  selectedCategory == "All" ||
+                  course['category'] == selectedCategory)
+              .toList();
+          if (courses.isEmpty) {
+            return const Center(child: Text("No courses found"));
+          }
+
           return ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: courses.length,
@@ -211,6 +296,7 @@ class HomePageScreen extends StatelessWidget {
                       double.tryParse(course['price'].toString()) ?? 0.0,
                       avgRating,
                       course['imageUrl'] ?? '',
+                      themeProvider,
                     ),
                   );
                 },
@@ -227,19 +313,23 @@ class HomePageScreen extends StatelessWidget {
         .collection('courses')
         .doc(courseId)
         .get();
-    double savedRating = double.tryParse(courseSnapshot['rating'].toString()) ??
-        0.0; // Get saved rating
+
+    double savedRating =
+        double.tryParse(courseSnapshot['rating'].toString()) ?? 0.0;
 
     QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
         .collection('reviews')
         .where('courseId', isEqualTo: courseId)
         .get();
 
-    if (reviewsSnapshot.docs.isEmpty) return savedRating;
-    ; // No reviews, return 0
-
     double totalRating = 0;
     int count = 0;
+
+    // ✅ Only include mentor rating if it's greater than 0
+    if (savedRating > 0) {
+      totalRating += savedRating;
+      count++;
+    }
 
     for (var doc in reviewsSnapshot.docs) {
       var reviewData = doc.data() as Map<String, dynamic>;
@@ -250,6 +340,7 @@ class HomePageScreen extends StatelessWidget {
     }
 
     double avgRating = count > 0 ? totalRating / count : 0.0;
+
     await FirebaseFirestore.instance
         .collection('courses')
         .doc(courseId)
@@ -257,20 +348,42 @@ class HomePageScreen extends StatelessWidget {
       'rating': avgRating,
     });
 
-    return avgRating; // ✅ Return the updated rating to UI
+    return avgRating;
   }
 }
 
-Widget _buildCourseCard(String category, String name, double offerPrice,
-    double price, double rating, String? imageUrl) {
+Widget _buildPlaceholder(ThemeProvider themeProvider) {
+  return Container(
+    height: 100,
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: Colors.grey[300], // Placeholder color
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+    ),
+    child: Center(
+      child: Icon(Icons.image, color: Colors.grey[600], size: 40),
+    ),
+  );
+}
+
+Widget _buildCourseCard(
+    String category,
+    String name,
+    double offerPrice,
+    double price,
+    double rating,
+    String? imageUrl,
+    ThemeProvider themeProvider) {
+  print(imageUrl);
+  print('[[[[[[[[[[[[[[=====]]]]]]]]]]]]]]');
   return Container(
     width: 180,
-    margin: EdgeInsets.only(right: 12),
+    margin: const EdgeInsets.only(right: 12),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(12),
       color: Colors.white,
       boxShadow: [
-        BoxShadow(
+        const BoxShadow(
           color: Colors.black12,
           blurRadius: 6,
           spreadRadius: 2,
@@ -281,68 +394,65 @@ Widget _buildCourseCard(String category, String name, double offerPrice,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          child: imageUrl != null && imageUrl.isNotEmpty
-              ? Image.network(
-                  imageUrl,
-                  height: 100,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 100,
-                      width: double.infinity,
-                      color: Colors.black,
-                    );
-                  },
-                )
-              : Container(
-                  height: 100,
-                  width: double.infinity,
-                  color: Colors.black,
-                ),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: Image.network(
+            imageUrl!,
+            height: 100,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+          // child: Image.network(
+          //   imageUrl!,
+          //   height: 100,
+          //   width: double.infinity,
+          //   fit: BoxFit.cover,
+          //   errorBuilder: (context, error, stackTrace) {
+          //     return _buildPlaceholder(themeProvider);
+          //   },
+          // )
         ),
         Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(category,
-                  style: TextStyle(color: Colors.orange, fontSize: 12)),
-              SizedBox(height: 4),
+                  style: const TextStyle(color: Colors.orange, fontSize: 12)),
+              const SizedBox(height: 4),
               Text(
                 name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Row(
                 children: [
                   Text(
-                    '\₹${offerPrice.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    '₹${offerPrice.toStringAsFixed(2)}',
+                    style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Colors.green),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    '\₹${price.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    '₹${price.toStringAsFixed(2)}',
+                    style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
                         decoration: TextDecoration.lineThrough),
                   ),
                 ],
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.star, color: Colors.orange, size: 16),
-                  SizedBox(width: 4),
+                  const Icon(Icons.star, color: Colors.orange, size: 16),
+                  const SizedBox(width: 4),
                   Text(rating.toStringAsFixed(1),
-                      style: TextStyle(fontSize: 14)),
+                      style: const TextStyle(fontSize: 14)),
                 ],
               ),
             ],
@@ -353,23 +463,25 @@ Widget _buildCourseCard(String category, String name, double offerPrice,
   );
 }
 
-Widget _buildMentorsList() {
+Widget _buildMentorsList(ThemeProvider themeProvider) {
   String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   return SizedBox(
-    height: 300, // Adjust height as needed
+    height: 150, // Adjust height as needed
     child: StreamBuilder(
       stream: FirebaseFirestore.instance.collection('mentors').snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No mentors available'));
+          return Center(
+              child: Text('No mentors available',
+                  style: TextStyle(color: themeProvider.textColor)));
         }
         return GridView.builder(
-          padding: EdgeInsets.all(8),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          padding: const EdgeInsets.all(8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3, // Adjust number of items per row
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
@@ -388,7 +500,7 @@ Widget _buildMentorsList() {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => mentorProfile(),
+                      builder: (context) => MentorProfile(mentorId: mentorId),
                     ),
                   );
                 } else {
@@ -406,13 +518,16 @@ Widget _buildMentorsList() {
                     radius: 40, // Adjust size
                     backgroundImage: imageUrl != null && imageUrl.isNotEmpty
                         ? NetworkImage(imageUrl)
-                        : AssetImage('assets/default_avatar.png')
+                        : const AssetImage('assets/default_avatar.png')
                             as ImageProvider,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     name,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: themeProvider.textColor),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

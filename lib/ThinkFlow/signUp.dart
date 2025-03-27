@@ -9,16 +9,18 @@ import 'package:thinkflow/ThinkFlow/password.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
+
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   // TextEditingController _lastNameController = TextEditingController();
-  TextEditingController _dobController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   // String? _password;
   String? _selectedGender;
   File? _profileImage;
@@ -123,7 +125,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFCFAF8),
+      backgroundColor: const Color(0xFFFCFAF8),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: SingleChildScrollView(
@@ -134,7 +136,7 @@ class _SignupScreenState extends State<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
+                const Row(
                   children: [
                     Icon(Icons.arrow_back),
                     SizedBox(width: 5),
@@ -145,7 +147,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Center(
                   child: Stack(
                     children: [
@@ -164,7 +166,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     size: 40, color: Colors.grey[700])
                                 : null),
                       ),
-                      Positioned(
+                      const Positioned(
                         bottom: 5,
                         right: 5,
                         child: CircleAvatar(
@@ -177,13 +179,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
                   validator: (value) =>
                       value!.isEmpty ? "Name is required" : null,
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.person, color: Colors.black54),
+                    prefixIcon: const Icon(Icons.person, color: Colors.black54),
                     hintText: "First Name",
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -207,12 +209,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 //     ),
                 //   ),
                 // ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 TextFormField(
                   controller: _dobController,
                   decoration: InputDecoration(
                     prefixIcon:
-                        Icon(Icons.calendar_today, color: Colors.black54),
+                        const Icon(Icons.calendar_today, color: Colors.black54),
                     labelText: "Date of Birth",
                     hintText: "DD/MM/YYYY",
                     filled: true,
@@ -223,13 +225,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 TextFormField(
                   controller: _emailController,
                   validator: (value) =>
                       value!.contains("@") ? null : "Enter a valid email",
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.email, color: Colors.black54),
+                    prefixIcon: const Icon(Icons.email, color: Colors.black54),
                     hintText: "Email",
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -239,14 +241,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 TextFormField(
                   controller: _phoneController,
                   validator: (value) => value!.length == 10
                       ? null
                       : "Enter a valid 10-digit number",
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.phone, color: Colors.black54),
+                    prefixIcon: const Icon(Icons.phone, color: Colors.black54),
                     hintText: "Phone Number",
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -257,11 +259,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   keyboardType: TextInputType.phone,
                 ),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
                 DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     prefixIcon:
-                        Icon(Icons.person_outline, color: Colors.black54),
+                        const Icon(Icons.person_outline, color: Colors.black54),
                     hintText: "Gender",
                     filled: true,
                     fillColor: Colors.grey[200],
@@ -283,7 +285,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     });
                   },
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Center(
                     child: GestureDetector(
                         onTap: () {},
@@ -311,7 +313,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                       content:
                                           Text("Please fill in all fields!")),
                                 );

@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class MentorLoginPage extends StatefulWidget {
+  const MentorLoginPage({super.key});
+
   @override
   _MentorLoginPageState createState() => _MentorLoginPageState();
 }
@@ -89,7 +91,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
         .set(mentorData);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Mentor details updated successfully!")),
+      const SnackBar(content: Text("Mentor details updated successfully!")),
     );
   }
 
@@ -99,12 +101,12 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: Text(
+        title: const Text(
           'Mentor Registration',
           style: TextStyle(
             fontSize: 22,
@@ -115,7 +117,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
         backgroundColor: Colors.orange,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -131,7 +133,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
                           : NetworkImage(imageUrl ??
                               "https://img.freepik.com/premium-vector/person-icon_109161-4674.jpg?w=740")),
                   child: _image == null
-                      ? Icon(
+                      ? const Icon(
                           Icons.person,
                           size: 50,
                           color: Colors.white,
@@ -148,13 +150,13 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
                         onPressed: () {
                           _pickImage();
                         },
-                        icon: Icon(Icons.camera_alt, color: Colors.white),
+                        icon: const Icon(Icons.camera_alt, color: Colors.white),
                       ),
                     )),
               ]),
             ),
-            SizedBox(height: 16),
-            Text(
+            const SizedBox(height: 16),
+            const Text(
               'Become a Mentor',
               style: TextStyle(
                 fontSize: 24,
@@ -162,7 +164,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
                 color: Colors.orange,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: nameController,
               decoration: InputDecoration(
@@ -173,7 +175,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
                     borderRadius: BorderRadius.circular(10.0)),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: selectedProfession,
               decoration: InputDecoration(
@@ -201,7 +203,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
                 });
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: experienceController,
               decoration: InputDecoration(
@@ -213,7 +215,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
               ),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: skillsController,
               decoration: InputDecoration(
@@ -224,10 +226,13 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
                     borderRadius: BorderRadius.circular(10.0)),
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Center(
                 child: GestureDetector(
-                    onTap: () => submitMentorDetails(context),
+                    onTap: () {
+                      submitMentorDetails(context);
+                      Navigator.pop(context);
+                    },
                     child: buildContinueButton("submit", context))),
           ],
         ),

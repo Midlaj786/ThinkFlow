@@ -1,9 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/chat.dart';
 
 class ContactScreen extends StatefulWidget {
+  ContactScreen({super.key});
+
   @override
   _ContactScreenState createState() => _ContactScreenState();
 }
@@ -15,20 +19,25 @@ class _ContactScreenState extends State<ContactScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: Color(0xFFFCFAF8),
+      backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFFFCFAF8),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: themeProvider.textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Chats',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: themeProvider.textColor)),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
             // 🔹 Search Bar
@@ -56,8 +65,8 @@ class _ContactScreenState extends State<ContactScreen> {
 
             // 🔹 Show Searched Mentors or Recent Chats
             searchQuery.isNotEmpty
-                ? Expanded(child: _buildSearchResults())
-                : Expanded(child: _buildChatList()),
+                ? Expanded(child: _buildSearchResults(themeProvider))
+                : Expanded(child: _buildChatList(themeProvider)),
           ],
         ),
       ),
@@ -65,7 +74,7 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   /// 🔹 Search Mentors (Only Followed Mentors)
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(ThemeProvider themeProvider) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('mentors')
@@ -79,8 +88,8 @@ class _ContactScreenState extends State<ContactScreen> {
           return Center(child: Text("No mentors found."));
         }
 
-        var mentors = snapshot.data!.docs.where((mentor) {
-          String name = (mentor['name'] ?? '').toString().toLowerCase();
+        var mentors = snapshot.data!.docs.where((user) {
+          String name = (user['name'] ?? '').toString().toLowerCase();
 
           return name.contains(searchQuery);
         }).toList();
@@ -90,9 +99,9 @@ class _ContactScreenState extends State<ContactScreen> {
             : ListView.builder(
                 itemCount: mentors.length,
                 itemBuilder: (context, index) {
-                  var mentor = mentors[index];
+                  var user = mentors[index];
                   return _buildChatTile(
-                      mentor.id, mentor['name'], mentor['profileimg']);
+                      user.id, user['name'], user['profileimg'], themeProvider);
                 },
               );
       },
@@ -100,7 +109,7 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   /// 🔹 Show Recent Chats
-  Widget _buildChatList() {
+  Widget _buildChatList(ThemeProvider themeProvider) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('chats')
@@ -108,8 +117,9 @@ class _ContactScreenState extends State<ContactScreen> {
           // .orderBy('lastMessageTime', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
+        }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(child: Text("No chats yet."));
@@ -127,18 +137,20 @@ class _ContactScreenState extends State<ContactScreen> {
             if (otherUserId == null) return SizedBox();
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
-                  .collection('mentors')
+                  .collection('users')
                   .doc(otherUserId)
                   .get(),
-              builder: (context, mentorSnapshot) {
-                if (!mentorSnapshot.hasData || !mentorSnapshot.data!.exists)
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
                   return SizedBox();
+                }
 
-                var mentor = mentorSnapshot.data!;
-                String name = mentor['name'] ?? 'Unknown';
-                String profileImg = mentor['profileimg'] ?? '';
+                var user = userSnapshot.data!;
+                String name = user['name'] ?? 'Unknown';
+                String profileImg = user['profileimg'] ?? '';
 
-                return _buildChatTile(otherUserId, name, profileImg);
+                return _buildChatTile(
+                    otherUserId, name, profileImg, themeProvider);
               },
             );
           },
@@ -148,20 +160,23 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   /// 🔹 Chat Tile UI
-  Widget _buildChatTile(String mentorId, String? name, String? profileImg) {
+  Widget _buildChatTile(String mentorId, String? name, String? profileImg,
+      ThemeProvider themeProvider) {
     return ListTile(
       leading: CircleAvatar(
         backgroundImage: profileImg != null && profileImg.isNotEmpty
             ? NetworkImage(profileImg)
             : null,
-        backgroundColor: Colors.black,
+        backgroundColor: themeProvider.textColor,
         child: profileImg == null || profileImg.isEmpty
             ? Icon(Icons.person,
-                color: Colors.white) // Default icon if no image
+                color:
+                    themeProvider.backgroundColor) 
             : null,
       ),
       title: Text(name ?? 'Unknown',
-          style: TextStyle(fontWeight: FontWeight.bold)),
+          style: TextStyle(
+              fontWeight: FontWeight.bold, color: themeProvider.textColor)),
       onTap: () {
         Navigator.push(
           context,

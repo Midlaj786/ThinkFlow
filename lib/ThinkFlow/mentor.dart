@@ -6,7 +6,7 @@ import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class MentorScreen extends StatefulWidget {
   final String mentorId;
-  MentorScreen({required this.mentorId});
+  const MentorScreen({super.key, required this.mentorId});
 
   @override
   State<MentorScreen> createState() => _MentorScreenState();
@@ -83,7 +83,7 @@ class _MentorScreenState extends State<MentorScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -97,7 +97,7 @@ class _MentorScreenState extends State<MentorScreen> {
                 //   return Center(child: CircularProgressIndicator());
                 // }
                 if (!snapshot.hasData || !snapshot.data!.exists) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
                 var mentor = snapshot.data!;
                 String name = mentor['name'] ?? 'Unknown';
@@ -109,27 +109,27 @@ class _MentorScreenState extends State<MentorScreen> {
                         radius: 40,
                         backgroundImage: profileImg.isNotEmpty
                             ? NetworkImage(profileImg)
-                            : AssetImage('assets/default_avatar.png')
+                            : const AssetImage('assets/default_avatar.png')
                                 as ImageProvider,
                         backgroundColor: Colors.black),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(name,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(profession, style: TextStyle(color: Colors.grey)),
-                    SizedBox(height: 12),
+                    Text(profession, style: const TextStyle(color: Colors.grey)),
+                    const SizedBox(height: 12),
                     _buildStatsRow(),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildFollowButton(),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         _buildButton('Message', Colors.grey),
                       ],
                     ),
-                    SizedBox(height: 16),
-                    TabBar(
+                    const SizedBox(height: 16),
+                    const TabBar(
                       labelColor: Colors.black,
                       indicatorColor: Colors.blue,
                       tabs: [
@@ -173,21 +173,21 @@ class _MentorScreenState extends State<MentorScreen> {
   }
 
   Widget _buildFollowButton() {
-    return Container(
+    return SizedBox(
       height: 50,
       width: 150,
       child: ElevatedButton(
         onPressed: _toggleFollow,
         style: ElevatedButton.styleFrom(
           backgroundColor: isFollowing ? Colors.grey : Colors.blue,
-          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
           // shape: RoundedRectangleBorder(
           //   borderRadius: BorderRadius.circular(8),
           // ),
         ),
         child: Text(
           isFollowing ? 'Following' : 'Follow',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -195,19 +195,19 @@ class _MentorScreenState extends State<MentorScreen> {
 
   Widget _buildInfoColumn(String value, String label) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           Text(value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Text(label, style: TextStyle(color: Colors.grey)),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(color: Colors.grey)),
         ],
       ),
     );
   }
 
   Widget _buildButton(String text, Color color) {
-    return Container(
+    return SizedBox(
       height: 50,
       width: 150,
       child: ElevatedButton(
@@ -216,7 +216,7 @@ class _MentorScreenState extends State<MentorScreen> {
         },
         style: ElevatedButton.styleFrom(backgroundColor: color),
         child: Text(text,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -229,10 +229,10 @@ class _MentorScreenState extends State<MentorScreen> {
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No courses available'));
+            return const Center(child: Text('No courses available'));
           }
           return ListView.builder(
             padding: const EdgeInsets.all(10),
@@ -285,23 +285,23 @@ class _MentorScreenState extends State<MentorScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(category,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.orange, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Text(title,
                       style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  SizedBox(height: 5),
+                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
                       Text('\$$price',
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,
                               fontSize: 15)),
-                      SizedBox(width: 5),
+                      const SizedBox(width: 5),
                       Text('\$$oldPrice',
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.grey,
                               decoration: TextDecoration.lineThrough)),
                     ],

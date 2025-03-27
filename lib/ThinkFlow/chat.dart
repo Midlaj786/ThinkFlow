@@ -2,17 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:thinkflow/ThinkFlow/Theme.dart';
 
 class ChatScreen extends StatefulWidget {
   final String receiverId;
-  ChatScreen({required this.receiverId});
+  ChatScreen({super.key, required this.receiverId});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  TextEditingController _messageController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+  late IO.Socket socket;
   String currentUserId = FirebaseAuth.instance.currentUser!.uid;
   String receiverName = "Chat";
   String receiverProfile = "";
@@ -21,9 +25,33 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _fetchReceiverDetails();
+    _initializeSocket();
   }
 
-  /// Fetch Receiver Details (Name & Profile Image)
+  void _initializeSocket() {
+    socket = IO.io("https://your-socket-server.com", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print("Connected to Socket.IO Server");
+      socket.emit("join_chat", getChatId());
+    });
+
+    socket.on("receive_message", (data) {
+      if (mounted) {
+        setState(() {}); // Update UI on new message
+      }
+    });
+
+    socket.onDisconnect((_) {
+      print("Disconnected from Socket.IO Server");
+    });
+  }
+
   void _fetchReceiverDetails() async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection('mentors')
@@ -46,12 +74,15 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
+      backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: themeProvider.textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -60,14 +91,17 @@ class _ChatScreenState extends State<ChatScreen> {
               backgroundImage: receiverProfile.isNotEmpty
                   ? NetworkImage(receiverProfile)
                   : null,
-              backgroundColor: Colors.black,
+              backgroundColor: themeProvider.textColor,
               child: receiverProfile.isEmpty
-                  ? Icon(Icons.person, color: Colors.white)
+                  ? Icon(Icons.person, color: themeProvider.backgroundColor)
                   : null,
             ),
             SizedBox(width: 8),
             Text(receiverName,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: themeProvider.textColor)),
           ],
         ),
       ),
@@ -100,7 +134,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         timestamp != null ? timestamp.toDate() : DateTime.now();
                     String formattedDate = _formatDate(messageTime);
 
-                    // Show date header at the top of the first message of the day
                     bool showDateHeader = lastMessageDate != formattedDate;
                     if (showDateHeader) {
                       lastMessageDate = formattedDate;
@@ -123,12 +156,10 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  /// **Build Each Chat Message**
   Widget _buildMessage(String text, Timestamp? timestamp, bool isMe) {
     DateTime messageTime =
         timestamp != null ? timestamp.toDate() : DateTime.now();
-    String formattedTime =
-        DateFormat('hh:mm a').format(messageTime); // ✅ AM/PM format
+    String formattedTime = DateFormat('hh:mm a').format(messageTime);
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -141,15 +172,20 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isMe ? Colors.teal : Colors.grey[600],
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+                bottomLeft: isMe ? Radius.circular(12) : Radius.circular(0),
+                bottomRight: isMe ? Radius.circular(0) : Radius.circular(12),
+              ),
             ),
-            child: Text(text, style: TextStyle(color: Colors.white)),
+            child: Text("$text   ", style: TextStyle(color: Colors.white)),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 12, left: 12),
+            padding: EdgeInsets.only(right: 12, left: 12),
             child: Text(
-              formattedTime, // ✅ Only showing time, now in AM/PM
-              style: TextStyle(color: Colors.grey, fontSize: 12),
+              formattedTime,
+              style: TextStyle(color: Colors.grey, fontSize: 10),
             ),
           ),
         ],
@@ -157,7 +193,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  /// **Message Input Field**
   Widget _buildMessageInput() {
     return Padding(
       padding: EdgeInsets.all(8.0),
@@ -192,18 +227,23 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  /// **Send Message to Firebase**
-  void _sendMessage() async {
+  void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
 
-    String chatId = getChatId();
     String messageText = _messageController.text.trim();
-
     _messageController.clear();
 
-    await FirebaseFirestore.instance
+    socket.emit("send_message", {
+      "chatId": getChatId(),
+      "senderId": currentUserId,
+      "receiverId": widget.receiverId,
+      "text": messageText,
+      "timestamp": DateTime.now().millisecondsSinceEpoch,
+    });
+
+    FirebaseFirestore.instance
         .collection('messages')
-        .doc(chatId)
+        .doc(getChatId())
         .collection('chats')
         .add({
       'senderId': currentUserId,
@@ -212,16 +252,13 @@ class _ChatScreenState extends State<ChatScreen> {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
-    await FirebaseFirestore.instance.collection('chats').doc(chatId).set({
+    FirebaseFirestore.instance.collection('chats').doc(getChatId()).set({
       'users': [currentUserId, widget.receiverId],
       'lastMessage': messageText,
       'lastMessageTime': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
-
-    _messageController.clear();
   }
 
-  /// **Format Date for Messages**
   String _formatDate(DateTime dateTime) {
     DateTime now = DateTime.now();
     DateTime yesterday = now.subtract(Duration(days: 1));
@@ -233,29 +270,37 @@ class _ChatScreenState extends State<ChatScreen> {
         DateFormat('yyyyMMdd').format(yesterday)) {
       return "Yesterday";
     } else if (dateTime.isAfter(now.subtract(Duration(days: 7)))) {
-      return DateFormat('EEEE').format(dateTime); // Monday, Tuesday, etc.
+      return DateFormat('EEEE').format(dateTime);
     } else {
-      return DateFormat('dd MMM yyyy').format(dateTime); // 12 Feb 2024
+      return DateFormat('dd MMM yyyy').format(dateTime);
     }
   }
 
-  /// **Date Header Widget**
   Widget _buildDateHeader(String date) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Center(
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+          padding: EdgeInsets.symmetric(vertical: 1, horizontal: 7),
           decoration: BoxDecoration(
-            color: Colors.grey[400],
+            color: Colors.grey[600],
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             date,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    socket.disconnect();
+    super.dispose();
   }
 }

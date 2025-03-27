@@ -10,7 +10,7 @@ import 'dart:typed_data';
 class UploadFilesPage extends StatefulWidget {
   final String courseId;
 
-  UploadFilesPage({required this.courseId});
+  const UploadFilesPage({super.key, required this.courseId});
 
   @override
   _UploadFilesPageState createState() => _UploadFilesPageState();
@@ -37,7 +37,7 @@ class _UploadFilesPageState extends State<UploadFilesPage> {
   Future<void> _uploadFiles() async {
     if (files.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select at least one file!")),
+        const SnackBar(content: Text("Please select at least one file!")),
       );
       return;
     }
@@ -68,7 +68,7 @@ class _UploadFilesPageState extends State<UploadFilesPage> {
     });
 
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Files Uploaded!")));
+        .showSnackBar(const SnackBar(content: Text("Files Uploaded!")));
   }
 
   @override
@@ -81,10 +81,10 @@ class _UploadFilesPageState extends State<UploadFilesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Upload Course Files"),
+        title: const Text("Upload Course Files"),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             ...List.generate(files.length, (index) {
@@ -94,7 +94,7 @@ class _UploadFilesPageState extends State<UploadFilesPage> {
                     onTap: () => _pickFile(index),
                     child: Container(
                       height: 60,
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(10),
@@ -108,17 +108,17 @@ class _UploadFilesPageState extends State<UploadFilesPage> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Icon(Icons.upload_file),
+                          const Icon(Icons.upload_file),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                 ],
               );
             }),
             IconButton(
-              icon: Icon(Icons.add_circle, size: 30, color: Colors.blue),
+              icon: const Icon(Icons.add_circle, size: 30, color: Colors.blue),
               onPressed: () {
                 setState(() {
                   files.add(
@@ -126,10 +126,10 @@ class _UploadFilesPageState extends State<UploadFilesPage> {
                 });
               },
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _uploadFiles,
-              child: Text("Submit Files"),
+              child: const Text("Submit Files"),
             ),
           ],
         ),
