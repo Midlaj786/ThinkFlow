@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
-import 'package:thinkflow/ThinkFlow/chat.dart';
-import 'package:thinkflow/ThinkFlow/contact.dart';
-import 'package:thinkflow/ThinkFlow/home.dart';
-import 'package:thinkflow/ThinkFlow/profail.dart';
+import 'package:thinkflow/User/chat.dart';
+import 'package:thinkflow/User/contact.dart';
+import 'package:thinkflow/User/home.dart';
+import 'package:thinkflow/User/profail.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

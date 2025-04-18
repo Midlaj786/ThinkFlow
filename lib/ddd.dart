@@ -146,3 +146,66 @@
 //     );
 //   }
 // }
+
+
+
+  // }
+
+  //   } on FirebaseAuthException catch (e) {
+  //     String errorMessage;
+  //     if (e.code == 'email-already-in-use') {
+  //       errorMessage = "This email is already registered. Try logging in.";
+  //     } else if (e.code == 'invalid-email') {
+  //       errorMessage = "Invalid email format!";
+  //     } else if (e.code == 'weak-password') {
+  //       errorMessage = "Password is too weak. Use a stronger password.";
+  //     } else {
+  //       errorMessage = "Error: ${e.message}";
+  //     }
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text(errorMessage)));
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Unknown Error: ${e.toString()}")),
+  //     );
+  //   }
+  // }
+
+  // void _saveDetails(String uid) async {
+  //   try {
+  //     String profileImageUrl = widget.userDetails['profileImage'] ?? "";
+
+  //     if (widget.userDetails['profileImage'] != null) {
+  //       final FirebaseStorage storage =
+  //           FirebaseStorage.instanceFor(bucket: "gs://thinkflow");
+  //       final ref = storage.ref().child(
+  //           "profile_images/${DateTime.now().microsecondsSinceEpoch}.jpg");
+
+  //       UploadTask uploadTask = ref.putFile(
+  //         widget.userDetails['profileImage'],
+  //         SettableMetadata(contentType: 'image/jpeg'),
+  //       );
+
+  //       TaskSnapshot taskSnapshot = await uploadTask;
+  //       profileImageUrl = await taskSnapshot.ref.getDownloadURL();
+  //     }
+
+  //     await _authService.saveDetails(
+  //       uid: uid,
+  //       name: widget.userDetails['name'] ?? "Unknown",
+  //       dob: widget.userDetails['dob'] ?? "N/A",
+  //       email: widget.userDetails['email'] ?? "N/A",
+  //       phone: widget.userDetails['phone'] ?? "N/A",
+  //       gender: widget.userDetails['gender'] ?? "N/A",
+  //       profileImage: profileImageUrl,
+  //     );
+  //   } catch (e) {
+  //     print("Error uploading profile image: $e");
+  //     _showSnackBar("Failed to upload profile image.");
+  //   }
+  // }
+
+  // void _showSnackBar(String message) {
+  //   ScaffoldMessenger.of(context)
+  //       .showSnackBar(SnackBar(content: Text(message)));
+  // }

@@ -52,6 +52,8 @@ dependencies:
     sdk: flutter
   supabase_flutter: ^2.8.4
   razorpay_flutter: ^1.4.0
+  image_cropper: ^5.0.0
+  video_player: ^2.9.5
   
 
 

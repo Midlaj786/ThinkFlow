@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/administration/sendmoney.dart';
-import 'package:thinkflow/ThinkFlow/review.dart';
+import 'package:thinkflow/ThinkFlow/coursvideo.dart';
+import 'package:thinkflow/User/review.dart';
+import 'package:thinkflow/ThinkFlow/videopage.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class CourseDetailPage extends StatefulWidget {
@@ -122,18 +124,47 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     children: [
                       Container(
                         height: 200,
-                        color: themeProvider.isDarkMode
-                            ? Colors.grey[200]
-                            : Colors.grey[900],
+  decoration: BoxDecoration(
+    color: course['imageUrl'] != null && course['imageUrl'].isNotEmpty
+        ? null
+        : (themeProvider.isDarkMode ? Colors.grey[200] : Colors.grey[900]),
+    image: course['imageUrl'] != null && course['imageUrl'].isNotEmpty
+        ? DecorationImage(
+            image: NetworkImage(course['imageUrl']),
+            fit: BoxFit.cover,
+          )
+        : null,
+  ),
                       ),
                       Padding(
                         padding: EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(course['category'],
-                                style: TextStyle(
-                                    color: Colors.orange, fontSize: 14)),
+                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(course['category'],
+                                    style: TextStyle(
+                                        color: Colors.orange, fontSize: 14)),
+                                        ElevatedButton.icon(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>CourseVideosPage() ,
+      ),
+    );
+  },
+  icon: Icon(Icons.play_circle_fill),
+  label: Text("Watch Preview"),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.orange,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  ),
+),
+
+                              ],
+                            ),
                             SizedBox(height: 4),
                             Text(
                               course['name'],

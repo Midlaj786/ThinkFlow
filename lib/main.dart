@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/administration/payment.dart';
-import 'package:thinkflow/ThinkFlow/login.dart';
+import 'package:thinkflow/User/login.dart';
+import 'package:thinkflow/User/searchcourse.dart';
+import 'package:thinkflow/ThinkFlow/searchmentor.dart';
+import 'package:thinkflow/User/splashscreen.dart';
 import 'package:thinkflow/firebase_options.dart';
 
 Future<void> main() async {
@@ -28,7 +31,11 @@ class MyApp extends StatelessWidget {
       // themeMode: Provider.of<ThemeProvider>(context).themeMode,
       // theme: ThemeData.light(),
       // darkTheme: ThemeData.dark(),
-      home: LoginScreen(),
+      home: SplashScreen(),
+      routes: {
+        '/login': (context) => LoginScreen(),
+        
+      },
     );
   }
 }

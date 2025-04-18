@@ -1,14 +1,20 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:thinkflow/ThinkFlow/auth.dart';
 import 'package:thinkflow/ThinkFlow/bottomNav.dart';
-import 'package:thinkflow/ThinkFlow/home.dart';
+import 'package:thinkflow/User/home.dart';
+import 'package:thinkflow/User/signUp.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class PasswordScreen extends StatefulWidget {
-  final Map<String, dynamic> userDetails;
+  final String emailId;
 
-  const PasswordScreen({super.key, required this.userDetails});
+  const PasswordScreen({
+    super.key,required this.emailId
+  });
 
   @override
   _PasswordScreenState createState() => _PasswordScreenState();
@@ -30,11 +36,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
       _showSnackBar("Password fields cannot be empty!");
       return;
     }
-    // if (widget.userDetails.containsKey('email')) {
-    //   _showSnackBar("Email is required");
-
-    //   return;
-    // }
+   
 
     if (_passwordController.text.length < 6) {
       _showSnackBar("Password must be at least 6 characters!");
@@ -50,57 +52,29 @@ class _PasswordScreenState extends State<PasswordScreen> {
 
     try {
       UserCredential userCredential = await _authService.signUp(
-              widget.userDetails['email'], _passwordController.text)
+              widget.emailId, _passwordController.text)
           as UserCredential;
 
       if (userCredential.user != null) {
         String uid = userCredential.user!.uid;
-        _saveDetails(uid);
+      
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => MainScreen()),
+          MaterialPageRoute(builder: (context) => SignupScreen()),
           (route) => false,
         );
-
-        _showSnackBar("Signup Completed Successfully!");
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      if (e.code == 'email-already-in-use') {
-        errorMessage = "This email is already registered. Try logging in.";
-      } else if (e.code == 'invalid-email') {
-        errorMessage = "Invalid email format!";
-      } else if (e.code == 'weak-password') {
-        errorMessage = "Password is too weak. Use a stronger password.";
-      } else {
-        errorMessage = "Error: ${e.message}";
-      }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errorMessage)));
+           }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Unknown Error: ${e.toString()}")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Unknown Error: ${e.toString()}")));
     }
   }
 
-  void _saveDetails(String uid) async {
-    await _authService.saveDetails(
-      uid: uid,
-      name: widget.userDetails['name'] ?? "Unknown",
-      dob: widget.userDetails['dob'] ?? "N/A",
-      email: widget.userDetails['email'] ?? "N/A",
-      phone: widget.userDetails['phone'] ?? "N/A",
-      gender: widget.userDetails['gender'] ?? "N/A",
-      profileImage: widget.userDetails['profileImage'] ?? "",
-    );
-  }
-
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+      
+    
   @override
   Widget build(BuildContext context) {
     return Scaffold(
