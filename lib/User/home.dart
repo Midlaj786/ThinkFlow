@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,7 +31,30 @@ class _HomePageScreenState extends State<HomePageScreen> {
   void initState() {
     super.initState();
     categoriesFuture = _fetchCategories();
+    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+      int nextPage = _pageController.page!.round() + 1;
+      if (nextPage >= _images.length) nextPage = 0;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+      );
+    });
   }
+   final PageController _pageController = PageController();
+  late Timer _timer;
+  void dispose() {
+    _timer.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  final List<String> _images = [
+    'assets/home1.jpg',
+    'assets/home2.jpg',
+    'assets/home3.jpg',
+    'assets/home4.jpg',
+  ];
 
   Future<List<String>> _fetchCategories() async {
     QuerySnapshot snapshot =
@@ -222,10 +246,21 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   Widget _buildBanner(ThemeProvider themeProvider) {
     return Container(
-      height: 200,
+      height: 250,
+      
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(48),
         color: themeProvider.textColor.withOpacity(0.1),
+      ),
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: _images.length,
+        itemBuilder: (context, index) {
+          return Image.asset(
+            _images[index],
+            fit: BoxFit.cover,
+          );
+        },
       ),
     );
   }
