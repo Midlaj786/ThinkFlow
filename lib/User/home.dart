@@ -3,13 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Mentor/mentorview.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/administration/admin.dart';
 import 'package:thinkflow/ThinkFlow/course.dart';
 import 'package:thinkflow/ThinkFlow/Mentor/courseuplode.dart';
 import 'package:thinkflow/ThinkFlow/Mentor/registration.dart';
 import 'package:thinkflow/User/login.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/mentor.dart';
+
 import 'package:thinkflow/ThinkFlow/Mentor/mentprof.dart';
 import 'package:thinkflow/User/searchcourse.dart';
 

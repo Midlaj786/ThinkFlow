@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Mentor/mentorview.dart';
+import 'package:thinkflow/ThinkFlow/Mentor/mentprof.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/administration/sendmoney.dart';
 import 'package:thinkflow/ThinkFlow/coursvideo.dart';
@@ -20,6 +22,7 @@ class CourseDetailPage extends StatefulWidget {
 class _CourseDetailPageState extends State<CourseDetailPage> {
   int likesCount = 0;
   bool isLiked = false;
+  String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   void initState() {
@@ -124,45 +127,52 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     children: [
                       Container(
                         height: 200,
-  decoration: BoxDecoration(
-    color: course['imageUrl'] != null && course['imageUrl'].isNotEmpty
-        ? null
-        : (themeProvider.isDarkMode ? Colors.grey[200] : Colors.grey[900]),
-    image: course['imageUrl'] != null && course['imageUrl'].isNotEmpty
-        ? DecorationImage(
-            image: NetworkImage(course['imageUrl']),
-            fit: BoxFit.cover,
-          )
-        : null,
-  ),
+                        decoration: BoxDecoration(
+                          color: course['imageUrl'] != null &&
+                                  course['imageUrl'].isNotEmpty
+                              ? null
+                              : (themeProvider.isDarkMode
+                                  ? Colors.grey[200]
+                                  : Colors.grey[900]),
+                          image: course['imageUrl'] != null &&
+                                  course['imageUrl'].isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(course['imageUrl']),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
                       ),
                       Padding(
                         padding: EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(course['category'],
                                     style: TextStyle(
                                         color: Colors.orange, fontSize: 14)),
-                                        ElevatedButton.icon(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>CourseVideosPage() ,
-      ),
-    );
-  },
-  icon: Icon(Icons.play_circle_fill),
-  label: Text("Watch Preview"),
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.orange,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  ),
-),
-
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            CourseVideosPage(),
+                                      ),
+                                    );
+                                  },
+                                  icon: Icon(Icons.play_circle_fill),
+                                  label: Text("Watch Preview"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.orange,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                  ),
+                                ),
                               ],
                             ),
                             SizedBox(height: 4),
@@ -208,41 +218,63 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                             ),
                             SizedBox(height: 16),
 
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.brown[900],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: Colors.black,
-                                      backgroundImage: imageUrl != null &&
-                                              imageUrl.isNotEmpty
-                                          ? NetworkImage(imageUrl)
-                                          : null),
-                                  SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(mentor['name'],
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold)),
-                                      Text(mentor['profession'],
-                                          style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 14)),
-                                    ],
-                                  ),
-                                  Spacer(),
-                                  Icon(Icons.chat_bubble_outline,
-                                      color: Colors.white),
-                                ],
+                            GestureDetector(
+                              onTap: () {
+                                if (currentUserId == mentorId) {
+                                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MentorProfile(mentorId: mentorId),
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MentorScreen(mentorId: mentorId),
+                    ),
+                  );
+                                }
+                                
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.brown[900],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                        radius: 24,
+                                        backgroundColor: Colors.black,
+                                        backgroundImage: imageUrl != null &&
+                                                imageUrl.isNotEmpty
+                                            ? NetworkImage(imageUrl)
+                                            : null),
+                                    SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(mentor['name'],
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold)),
+                                        Text(mentor['profession'],
+                                            style: TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 14)),
+                                      ],
+                                    ),
+                                    Spacer(),
+                                    IconButton(
+                                      icon: Icon(Icons.chat_bubble_outline),
+                                    onPressed:(){ startChat(context, mentorId);},
+                                        color: Colors.white),
+                                  ],
+                                ),
                               ),
                             ),
                             SizedBox(height: 16),

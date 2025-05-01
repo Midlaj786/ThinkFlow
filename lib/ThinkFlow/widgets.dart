@@ -79,7 +79,26 @@ String timeAgo(Timestamp? timestamp) {
 void startChat(BuildContext context, String receiverId) async {
   String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
-  // Check if a chat already exists
+  // 🔍 Check if current user is a follower of the mentor
+  DocumentSnapshot mentorDoc = await FirebaseFirestore.instance
+      .collection('mentors')
+      .doc(receiverId)
+      .get();
+
+  List<dynamic> followers = mentorDoc['followers'] ?? [];
+
+  if (!followers.contains(currentUserId)) {
+    // ❌ Not a follower — show a message and return
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please follow the mentor to send a message."),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  // ✅ Check if a chat already exists
   QuerySnapshot existingChat = await FirebaseFirestore.instance
       .collection('messages')
       .where('users', arrayContains: currentUserId)

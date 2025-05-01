@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/course.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class MentorScreen extends StatefulWidget {
   final String mentorId;
-  const MentorScreen({super.key, required this.mentorId});
+   MentorScreen({super.key, required this.mentorId});
 
   @override
   State<MentorScreen> createState() => _MentorScreenState();
@@ -76,14 +78,16 @@ class _MentorScreenState extends State<MentorScreen> {
 
   @override
   Widget build(BuildContext context) {
+     final themeProvider = Provider.of<ThemeProvider>(context);
+
     return DefaultTabController(
         length: 2,
-        child: Scaffold(
+        child: Scaffold(backgroundColor: themeProvider.backgroundColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              icon:  Icon(Icons.arrow_back, color:themeProvider.textColor),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -97,7 +101,7 @@ class _MentorScreenState extends State<MentorScreen> {
                 //   return Center(child: CircularProgressIndicator());
                 // }
                 if (!snapshot.hasData || !snapshot.data!.exists) {
-                  return const Center(child: CircularProgressIndicator());
+                  return  Center(child: CircularProgressIndicator());
                 }
                 var mentor = snapshot.data!;
                 String name = mentor['name'] ?? 'Unknown';
@@ -109,28 +113,28 @@ class _MentorScreenState extends State<MentorScreen> {
                         radius: 40,
                         backgroundImage: profileImg.isNotEmpty
                             ? NetworkImage(profileImg)
-                            : const AssetImage('assets/default_avatar.png')
+                            :  AssetImage('assets/default_avatar.png')
                                 as ImageProvider,
                         backgroundColor: Colors.black),
-                    const SizedBox(height: 8),
+                     SizedBox(height: 8),
                     Text(name,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(profession, style: const TextStyle(color: Colors.grey)),
-                    const SizedBox(height: 12),
-                    _buildStatsRow(),
-                    const SizedBox(height: 16),
+                        style:  TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold,color: themeProvider.textColor)),
+                    Text(profession, style:  TextStyle(color: Colors.grey)),
+                     SizedBox(height: 12),
+                    _buildStatsRow(themeProvider),
+                     SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildFollowButton(),
-                        const SizedBox(width: 8),
+                         SizedBox(width: 8),
                         _buildButton('Message', Colors.grey),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const TabBar(
-                      labelColor: Colors.black,
+                     SizedBox(height: 16),
+                     TabBar(
+                      labelColor: themeProvider.textColor,
                       indicatorColor: Colors.blue,
                       tabs: [
                         Tab(text: 'Courses'),
@@ -152,7 +156,7 @@ class _MentorScreenState extends State<MentorScreen> {
         ));
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(ThemeProvider themeProvider) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('courses')
@@ -164,8 +168,8 @@ class _MentorScreenState extends State<MentorScreen> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildInfoColumn('$courseCount', 'Courses'),
-            _buildInfoColumn('$followersCount', 'Followers'),
+            _buildInfoColumn('$courseCount', 'Courses',themeProvider),
+            _buildInfoColumn('$followersCount', 'Followers',themeProvider),
           ],
         );
       },
@@ -180,27 +184,27 @@ class _MentorScreenState extends State<MentorScreen> {
         onPressed: _toggleFollow,
         style: ElevatedButton.styleFrom(
           backgroundColor: isFollowing ? Colors.grey : Colors.blue,
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+          padding:  EdgeInsets.symmetric(horizontal: 30, vertical: 12),
           // shape: RoundedRectangleBorder(
           //   borderRadius: BorderRadius.circular(8),
           // ),
         ),
         child: Text(
           isFollowing ? 'Following' : 'Follow',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style:  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
-  Widget _buildInfoColumn(String value, String label) {
+  Widget _buildInfoColumn(String value, String label,ThemeProvider themeProvider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding:  EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           Text(value,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          Text(label, style: const TextStyle(color: Colors.grey)),
+              style:  TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color:themeProvider.textColor )),
+          Text(label, style:  TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -216,7 +220,7 @@ class _MentorScreenState extends State<MentorScreen> {
         },
         style: ElevatedButton.styleFrom(backgroundColor: color),
         child: Text(text,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style:  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -229,13 +233,13 @@ class _MentorScreenState extends State<MentorScreen> {
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return  Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No courses available'));
+            return  Center(child: Text('No courses available'));
           }
           return ListView.builder(
-            padding: const EdgeInsets.all(10),
+            padding:  EdgeInsets.all(10),
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               final course = snapshot.data!.docs[index];
@@ -264,8 +268,8 @@ class _MentorScreenState extends State<MentorScreen> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10),
-        padding: const EdgeInsets.all(8),
+        margin:  EdgeInsets.symmetric(vertical: 10),
+        padding:  EdgeInsets.all(8),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey[300]!),
           borderRadius: BorderRadius.circular(10),
@@ -279,29 +283,29 @@ class _MentorScreenState extends State<MentorScreen> {
               decoration: BoxDecoration(
                   color: Colors.black, borderRadius: BorderRadius.circular(10)),
             ),
-            const SizedBox(width: 10),
+             SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(category,
-                      style: const TextStyle(
+                      style:  TextStyle(
                           color: Colors.orange, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 5),
+                   SizedBox(height: 5),
                   Text(title,
                       style:
-                          const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 5),
+                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                   SizedBox(height: 5),
                   Row(
                     children: [
                       Text('\$$price',
-                          style: const TextStyle(
+                          style:  TextStyle(
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,
                               fontSize: 15)),
-                      const SizedBox(width: 5),
+                       SizedBox(width: 5),
                       Text('\$$oldPrice',
-                          style: const TextStyle(
+                          style:  TextStyle(
                               color: Colors.grey,
                               decoration: TextDecoration.lineThrough)),
                     ],
@@ -317,7 +321,7 @@ class _MentorScreenState extends State<MentorScreen> {
 
   // Widget _buildRatingsTab() {
   //   return ListView.builder(
-  //     padding: const EdgeInsets.all(16),
+  //     padding:  EdgeInsets.all(16),
   //     itemCount: ratings.length,
   //     itemBuilder: (context, index) {
   //       final review = ratings[index];
