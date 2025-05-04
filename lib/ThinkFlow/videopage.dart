@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:thinkflow/ThinkFlow/coursvideo.dart';
+import 'package:thinkflow/ThinkFlow/videoplayer.dart';
 
 class CourseVideosPage extends StatelessWidget {
   final List<Map<String, String>> videos = [

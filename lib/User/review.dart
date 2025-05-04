@@ -101,99 +101,101 @@ class _ReviewPageState extends State<ReviewPage> {
         elevation: 0,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(color: Colors.grey.shade300, blurRadius: 5)
-                ],
-              ),
-              padding: EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color:
-                          imageUrl != null ? Colors.transparent : Colors.black,
-                      borderRadius: BorderRadius.circular(8),
-                      image: imageUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(imageUrl!), fit: BoxFit.cover)
-                          : null,
+        padding: EdgeInsets.all(6.0),
+        child: SingleChildScrollView(scrollDirection: Axis.vertical,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(color: Colors.grey.shade300, blurRadius: 5)
+                  ],
+                ),
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color:
+                            imageUrl != null ? Colors.transparent : Colors.black,
+                        borderRadius: BorderRadius.circular(8),
+                        image: imageUrl != null
+                            ? DecorationImage(
+                                image: NetworkImage(imageUrl!), fit: BoxFit.cover)
+                            : null,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(category,
-                          style: TextStyle(
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold)),
-                      SizedBox(height: 5),
-                      Text(courseName,
-                          style: TextStyle(fontWeight: FontWeight.w500)),
-                    ],
-                  )
-                ],
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(category,
+                            style: TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold)),
+                        SizedBox(height: 5),
+                        Text(courseName,
+                            style: TextStyle(fontWeight: FontWeight.w500)),
+                      ],
+                    )
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text("Rate this Course",
-                style: TextStyle(fontSize: 16, color: themeProvider.textColor)),
-            SizedBox(height: 8),
-            RatingBar.builder(
-              initialRating: _rating,
-              minRating: 1,
-              direction: Axis.horizontal,
-              allowHalfRating: true,
-              itemCount: 5,
-              itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-              itemBuilder: (context, _) =>
-                  Icon(Icons.star, color: Colors.amber),
-              unratedColor: themeProvider.isDarkMode
-                  ? Colors.grey[700]
-                  : Colors.grey[400],
-              onRatingUpdate: (rating) {
-                setState(() {
-                  _rating = rating;
-                });
-              },
-            ),
-            SizedBox(height: 20),
-            Text("Write your Review",
-                style: TextStyle(fontSize: 16, color: themeProvider.textColor)),
-            SizedBox(height: 8),
-            TextFormField(
-              controller: _reviewController,
-              maxLength: 500,
-              maxLines: 5,
-              decoration: InputDecoration(
-                fillColor: themeProvider.isDarkMode
-                    ? Colors.grey[800]
-                    : Colors.grey[200],
-                filled: true,
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              SizedBox(height: 20),
+              Text("Rate this Course",
+                  style: TextStyle(fontSize: 16, color: themeProvider.textColor)),
+              SizedBox(height: 8),
+              RatingBar.builder(
+                initialRating: _rating,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) =>
+                    Icon(Icons.star, color: Colors.amber),
+                unratedColor: themeProvider.isDarkMode
+                    ? Colors.grey[700]
+                    : Colors.grey[400],
+                onRatingUpdate: (rating) {
+                  setState(() {
+                    _rating = rating;
+                  });
+                },
               ),
-            ),
-            SizedBox(height: 20),
-            Center(
-                child: GestureDetector(
-              onTap: () {
-                _submitReview();
-                Navigator.pop(context);
-              },
-              child: buildContinueButton("Submit", context),
-            ))
-          ],
+              SizedBox(height: 20),
+              Text("Write your Review",
+                  style: TextStyle(fontSize: 16, color: themeProvider.textColor)),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _reviewController,
+                maxLength: 500,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  fillColor: themeProvider.isDarkMode
+                      ? Colors.grey[800]
+                      : Colors.grey[200],
+                  filled: true,
+                  border:
+                      OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+              SizedBox(height: 20),
+              Center(
+                  child: GestureDetector(
+                onTap: () {
+                  _submitReview();
+                  Navigator.pop(context);
+                },
+                child: buildContinueButton("Submit", context),
+              ))
+            ],
+          ),
         ),
       ),
       backgroundColor: themeProvider.backgroundColor,

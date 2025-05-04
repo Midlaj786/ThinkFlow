@@ -62,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(6.0),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Column(

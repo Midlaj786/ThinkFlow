@@ -6,7 +6,7 @@ import 'package:thinkflow/ThinkFlow/Mentor/mentorview.dart';
 import 'package:thinkflow/ThinkFlow/Mentor/mentprof.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/administration/sendmoney.dart';
-import 'package:thinkflow/ThinkFlow/coursvideo.dart';
+import 'package:thinkflow/ThinkFlow/videoplayer.dart';
 import 'package:thinkflow/User/review.dart';
 import 'package:thinkflow/ThinkFlow/videopage.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';

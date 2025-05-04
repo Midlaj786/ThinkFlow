@@ -78,7 +78,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
       drawer: _buildDrawer(context, themeProvider),
       appBar: _buildAppBar(themeProvider),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(6.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

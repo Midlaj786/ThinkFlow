@@ -57,12 +57,16 @@ class _MentorSearchState extends State<MentorSearch> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          _buildSearchBar(themeProvider),
-          _buildProfessionChips(),
-          Expanded(child: _buildMentorList(themeProvider)),
-        ],
+      body: SingleChildScrollView(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSearchBar(themeProvider),
+            _buildProfessionChips(),
+            SizedBox
+            (height: MediaQuery.of(context).size.height * 0.6,
+              child: _buildMentorList(themeProvider)),
+          ],
+        ),
       ),
     );
   }
@@ -210,6 +214,7 @@ Widget _buildSuggestions(ThemeProvider themeProvider) {
           }
 
           return GridView.builder(
+            
             itemCount: mentors.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
