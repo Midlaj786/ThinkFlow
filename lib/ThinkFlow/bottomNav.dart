@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/User/chat.dart';
 import 'package:thinkflow/User/contact.dart';
 import 'package:thinkflow/User/home.dart';
@@ -24,15 +26,19 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: themeProvider.textColor,
+        backgroundColor: themeProvider.backgroundColor,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.home,), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.menu_book), label: 'My Courses'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chats'),

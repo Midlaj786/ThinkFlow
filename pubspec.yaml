@@ -35,6 +35,10 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
+  amplify_flutter: 
+  amplify_auth_cognito:
+  amplify_storage_s3: 
+  amplify_api: 
   firebase_core: ^3.11.0
   font_awesome_flutter: ^10.8.0
   image_picker: ^1.1.2
@@ -54,6 +58,9 @@ dependencies:
   razorpay_flutter: ^1.4.0
   image_cropper: ^5.0.0
   video_player: ^2.9.5
+  agora_rtc_engine: ^6.5.1
+  permission_handler: ^11.3.1
+  firebase_database: ^11.3.5
   
 
 

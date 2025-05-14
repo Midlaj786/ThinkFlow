@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
+import 'package:thinkflow/ThinkFlow/administration/onlinecall.dart';
 import 'package:thinkflow/ThinkFlow/course.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
@@ -138,7 +139,7 @@ class _MentorScreenState extends State<MentorScreen> {
                       indicatorColor: Colors.blue,
                       tabs: [
                         Tab(text: 'Courses'),
-                        Tab(text: 'Ratings'),
+                        Tab(text: 'Meetings'),
                       ],
                     ),
                     Expanded(
@@ -146,6 +147,7 @@ class _MentorScreenState extends State<MentorScreen> {
                         children: [
                           _buildCoursesTab(),
                           _buildCoursesTab(),
+                          // _buildJoinMeetingButton(),
                           // _buildRatingsTab(),
                         ],
                       ),
@@ -249,6 +251,63 @@ class _MentorScreenState extends State<MentorScreen> {
           );
         });
   }
+// Widget _buildJoinMeetingButton() {
+//   return StreamBuilder<DocumentSnapshot>(
+//     stream: FirebaseFirestore.instance
+//         .collection('mentors')
+//         .doc(widget.mentorId)
+//         .snapshots(),
+//     builder: (context, snapshot) {
+//       if (snapshot.hasError) {
+//         return Text('Something went wrong');
+//       }
+
+//       if (snapshot.connectionState == ConnectionState.waiting) {
+//         return SizedBox(); // Or a small loading indicator if you prefer
+//       }
+
+//       if (!snapshot.hasData || !snapshot.data!.exists) {
+//         return SizedBox();
+//       }
+
+//       final data = snapshot.data!.data() as Map<String, dynamic>?;
+//       final isLive = data?['isLive'] ?? false;
+//       final channelName = data?['channelName'] ?? '';
+
+//       if (isLive && channelName.isNotEmpty) {
+//         return Padding(
+//           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+//           child: SizedBox(
+//             width: double.infinity,
+//             child: ElevatedButton.icon(
+//               onPressed: () {
+//                 Navigator.push(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (_) => VideoCallScreen(channelName: channelName, isMentor: true,),
+//                   ),
+//                 );
+//               },
+//               icon: Icon(Icons.video_call),
+//               label: Text('Join Live Meeting', style: TextStyle(fontSize: 16)),
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: Colors.green, // Or your preferred color
+//                 foregroundColor: Colors.white,
+//                 padding: EdgeInsets.symmetric(vertical: 12),
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(8),
+//                 ),
+//               ),
+//             ),
+//           ),
+//         );
+//       }
+
+//       return SizedBox(); // No button if not live or no channel name
+//     },
+//   );
+// }
+
 
   Widget _buildCourseItem(QueryDocumentSnapshot course) {
     Map<String, dynamic> courseData = course.data() as Map<String, dynamic>;

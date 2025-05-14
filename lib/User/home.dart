@@ -154,46 +154,48 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   Widget _buildDrawer(BuildContext context, ThemeProvider themeProvider) {
     String? uid = FirebaseAuth.instance.currentUser?.uid;
-    return Drawer(
-      backgroundColor: themeProvider.backgroundColor,
-      child: Column(
-        children: [
-          ListTile(
-            title: Text("Become a Mentor",
-                style: TextStyle(color: themeProvider.textColor)),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const MentorLoginPage()),
-              );
-            },
-          ),
-          ListTile(
-            title: Text("Courses",
-                style: TextStyle(color: themeProvider.textColor)),
-            onTap: () {
-              fetchUserData();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CourseUpload()),
-              );
-            },
-          ),
-          if (uid == "xq149ozD79fnsZcdOqY07u5F3lB2") // Check if UID matches
+    return SafeArea(
+      child: Drawer(
+        backgroundColor: themeProvider.backgroundColor,
+        child: Column(
+          children: [
             ListTile(
-              title: Text("Admin Page",
-                  style: TextStyle(
-                      color: themeProvider.textColor,
-                      fontWeight: FontWeight.bold)),
+              title: Text("Become a Mentor",
+                  style: TextStyle(color: themeProvider.textColor)),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AdminPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const MentorLoginPage()),
                 );
               },
             ),
-        ],
+            ListTile(
+              title: Text("Courses",
+                  style: TextStyle(color: themeProvider.textColor)),
+              onTap: () {
+                fetchUserData();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CourseUpload()),
+                );
+              },
+            ),
+            if (uid == "xq149ozD79fnsZcdOqY07u5F3lB2") // Check if UID matches
+              ListTile(
+                title: Text("Admin Page",
+                    style: TextStyle(
+                        color: themeProvider.textColor,
+                        fontWeight: FontWeight.bold)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminPage()),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

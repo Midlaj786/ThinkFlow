@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
+import 'package:thinkflow/ThinkFlow/administration/onlinecall.dart';
 import 'package:thinkflow/ThinkFlow/administration/payment.dart';
 import 'package:thinkflow/ThinkFlow/course.dart';
 import 'package:thinkflow/ThinkFlow/Mentor/courseuplode.dart';
-
 import 'package:thinkflow/ThinkFlow/Mentor/registration.dart';
 
 class MentorProfile extends StatefulWidget {
@@ -23,14 +23,67 @@ class _MentorProfileState extends State<MentorProfile> {
   String profession = "";
   int followersCount = 0;
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+  bool isMeetingLive = false;
+  String? meetingChannelName;
+  String meetingStatus = "No active meeting";
 
   @override
   void initState() {
     super.initState();
     _fetchMentorDetails();
+    _setupMeetingListener();
   }
 
-  /// **Fetch Mentor Details**
+  void _setupMeetingListener() {
+    FirebaseFirestore.instance
+        .collection('mentors')
+        .doc(widget.mentorId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        setState(() {
+          isMeetingLive = data['isLive'] ?? false;
+          meetingChannelName = data['channelName'];
+          meetingStatus = isMeetingLive 
+              ? "Meeting is live!" 
+              : "No active meeting";
+        });
+      }
+    });
+  }
+
+  // Future<void> toggleMeeting() async {
+  //   final docRef = FirebaseFirestore.instance.collection('mentors').doc(widget.mentorId);
+
+  //   if (!isMeetingLive) {
+  //     // Generate a unique channel name
+  //     final channelName = '${widget.mentorId}_${DateTime.now().millisecondsSinceEpoch}';
+      
+  //     // Start meeting
+  //     await docRef.update({
+  //       'isLive': true,
+  //       'channelName': channelName,
+  //       'meetingStartTime': FieldValue.serverTimestamp(),
+  //     });
+      
+  //     // Navigate to video call screen
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => VideoCallScreen(channelName: channelName, isMentor: false),
+  //       ),
+  //     );
+  //   } else {
+  //     // End meeting
+  //     await docRef.update({
+  //       'isLive': false,
+  //       'channelName': '',
+  //       'meetingEndTime': FieldValue.serverTimestamp(),
+  //     });
+  //   }
+  // }
+
   void _fetchMentorDetails() async {
     DocumentSnapshot mentorDoc = await FirebaseFirestore.instance
         .collection('mentors')
@@ -44,6 +97,8 @@ class _MentorProfileState extends State<MentorProfile> {
         profileImg = mentorData['profileimg'] ?? '';
         profession = mentorData['profession'] ?? 'N/A';
         followersCount = (mentorData['followers'] as List?)?.length ?? 0;
+        isMeetingLive = mentorData['isLive'] ?? false;
+        meetingChannelName = mentorData['channelName'];
       });
     }
   }
@@ -98,11 +153,11 @@ class _MentorProfileState extends State<MentorProfile> {
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 40, // Adjust size
-                    backgroundImage: profileImg != null && profileImg.isNotEmpty
+                    radius: 40,
+                    backgroundImage: profileImg.isNotEmpty
                         ? NetworkImage(profileImg)
                         : null,
-                    child: profileImg == null || profileImg.isEmpty
+                    child: profileImg.isEmpty
                         ? Icon(
                             Icons.person,
                             size: 60,
@@ -119,21 +174,20 @@ class _MentorProfileState extends State<MentorProfile> {
                   Text(profession,
                       style: TextStyle(
                           color: themeProvider.textColor.withOpacity(0.7))),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.edit, color: themeProvider.textColor),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MentorLoginPage()),
-                      ).then((_) => _fetchMentorDetails());
-                    },
-                  ),
+                  if (isMentor) ...[
+                    SizedBox(width: 5),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: themeProvider.textColor),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MentorLoginPage()),
+                        ).then((_) => _fetchMentorDetails());
+                      },
+                    ),
+                  ],
                   const SizedBox(height: 10),
-
                   // Followers Count
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -146,11 +200,68 @@ class _MentorProfileState extends State<MentorProfile> {
                               fontSize: 16, color: themeProvider.textColor)),
                     ],
                   ),
+                  // if (isMentor) ...[
+                  //   const SizedBox(height: 15),
+                  //   Column(
+                  //     children: [
+                  //       Text(
+                  //         meetingStatus,
+                  //         style: TextStyle(
+                  //           color: isMeetingLive ? Colors.green : Colors.grey,
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(height: 10),
+                  //       ElevatedButton.icon(
+                  //         onPressed: toggleMeeting,
+                  //         icon: Icon(
+                  //           isMeetingLive ? Icons.stop : Icons.video_call,
+                  //           color: Colors.white,
+                  //         ),
+                  //         label: Text(
+                  //           isMeetingLive ? "End Meeting" : "Start Meeting",
+                  //           style: TextStyle(color: Colors.white),
+                  //         ),
+                  //         style: ElevatedButton.styleFrom(
+                  //           backgroundColor: isMeetingLive 
+                  //               ? Colors.red 
+                  //               : Colors.green,
+                  //           shape: RoundedRectangleBorder(
+                  //             borderRadius: BorderRadius.circular(10),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       if (isMeetingLive) ...[
+                  //         const SizedBox(height: 10),
+                  //         ElevatedButton(
+                  //           onPressed: () {
+                  //             if (meetingChannelName != null) {
+                  //               Navigator.push(
+                  //                 context,
+                  //                 MaterialPageRoute(
+                  //                   builder: (context) => 
+                  //                     VideoCallScreen(channelName: meetingChannelName!, isMentor: false,),
+                  //                 ),
+                  //               );
+                  //             }
+                  //           },
+                  //           child: Text("Join Meeting",
+                  //               style: TextStyle(color: Colors.white)),
+                  //           style: ElevatedButton.styleFrom(
+                  //             backgroundColor: Colors.blue,
+                  //             shape: RoundedRectangleBorder(
+                  //               borderRadius: BorderRadius.circular(10),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ],
+                  //   ),
+                  // ],
                 ],
               ),
             ),
             const SizedBox(height: 20),
-
             // Courses Section
             Expanded(child: _buildCoursesList(isMentor, themeProvider)),
           ],
@@ -159,7 +270,6 @@ class _MentorProfileState extends State<MentorProfile> {
     );
   }
 
-  /// **Build Courses List**
   Widget _buildCoursesList(bool isMentor, ThemeProvider themeProvider) {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
@@ -189,7 +299,6 @@ class _MentorProfileState extends State<MentorProfile> {
     );
   }
 
-  /// **Course Item with Edit/Delete for Mentors**
   Widget _buildCourseItem(QueryDocumentSnapshot course, bool isMentor,
       ThemeProvider themeProvider) {
     Map<String, dynamic> courseData = course.data() as Map<String, dynamic>;
@@ -209,13 +318,13 @@ class _MentorProfileState extends State<MentorProfile> {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: ImageUrl.isEmpty? Colors.grey[300] : null,
-          image: ImageUrl.isNotEmpty
-              ? DecorationImage(
-                  image: NetworkImage(ImageUrl),
-                  fit: BoxFit.cover,
-                )
-              : null,
+            color: ImageUrl.isEmpty ? Colors.grey[300] : null,
+            image: ImageUrl.isNotEmpty
+                ? DecorationImage(
+                    image: NetworkImage(ImageUrl),
+                    fit: BoxFit.cover,
+                  )
+                : null,
             borderRadius: BorderRadius.circular(8),
           ),
         ),
@@ -256,7 +365,6 @@ class _MentorProfileState extends State<MentorProfile> {
     );
   }
 
-  /// **Delete Course from Firestore**
   void _deleteCourse(String courseId) async {
     bool confirmDelete = await _showDeleteConfirmationDialog();
     if (confirmDelete) {
@@ -270,7 +378,6 @@ class _MentorProfileState extends State<MentorProfile> {
     }
   }
 
-  /// **Delete Confirmation Dialog**
   Future<bool> _showDeleteConfirmationDialog() async {
     return await showDialog(
           context: context,

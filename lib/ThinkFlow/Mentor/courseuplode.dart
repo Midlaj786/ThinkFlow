@@ -27,6 +27,8 @@ class _CourseUploadState extends State<CourseUpload> {
   final _auth = FirebaseAuth.instance;
   String? _imageUrl;
   double _rating = 0.0;
+  bool showPriceField = false;
+
 
   List<String> categories = [];
   String selectedCategory = "";
