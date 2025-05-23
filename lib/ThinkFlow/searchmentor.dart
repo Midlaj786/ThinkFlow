@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:thinkflow/ThinkFlow/Mentor/mentorview.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 
-import 'package:thinkflow/ThinkFlow/Mentor/mentprof.dart';
-
 class MentorSearch extends StatefulWidget {
   @override
   _MentorSearchState createState() => _MentorSearchState();
@@ -220,7 +218,7 @@ Widget _buildSuggestions(ThemeProvider themeProvider) {
               crossAxisCount: 3,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.9,
+              childAspectRatio: 0.6,
             ),
             itemBuilder: (context, index) {
               var mentor = mentors[index];

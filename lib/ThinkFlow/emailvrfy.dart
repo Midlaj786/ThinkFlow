@@ -67,70 +67,72 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFCFAF8),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Row(
-                  children: [
-                    Icon(Icons.arrow_back),
-                    SizedBox(width: 5),
-                    Text(
-                      "Enter Your Email",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                TextFormField(
-                  controller: _emailController,
-                  validator: (value) =>
-                      (value != null && value.contains("@")) ? null : "Enter a valid email",
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.email, color: Colors.black54),
-                    hintText: "Email",
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
+      body:SafeArea (
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.arrow_back),
+                      SizedBox(width: 5),
+                      Text(
+                        "Enter Your Email",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                ),
-                if (_errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                  const SizedBox(height: 30),
+                  TextFormField(
+                    controller: _emailController,
+                    validator: (value) =>
+                        (value != null && value.contains("@")) ? null : "Enter a valid email",
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.email, color: Colors.black54),
+                      hintText: "Email",
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                const SizedBox(height: 15),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _verifyEmail,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  if (_errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                      ),
                     ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Verify", style: TextStyle(color: Colors.white)),
+                  const SizedBox(height: 15),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _verifyEmail,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text("Verify", style: TextStyle(color: Colors.white)),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 30),
-                Center(
-                  child: GestureDetector(
-                    onTap: _continue,
-                    child: buildContinueButton('Continue', context),
+                  const SizedBox(height: 30),
+                  Center(
+                    child: GestureDetector(
+                      onTap: _continue,
+                      child: buildContinueButton('Continue', context),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

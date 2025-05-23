@@ -6,7 +6,6 @@ import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/bottomNav.dart';
 import 'package:thinkflow/ThinkFlow/terms.dart';
 import 'package:thinkflow/User/editprofile.dart';
-import 'package:thinkflow/User/home.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -24,6 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    print('[[[[[[[[[11111111111111111]]]]]]]]]');
     _fetchUserData();
   }
 
@@ -40,6 +40,9 @@ class _ProfilePageState extends State<ProfilePage> {
         _profileImage = userDoc['profileimg'];
       });
     }
+    print('[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]');
+    print(_profileImage);
+    print('[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]');
   }
 
   @override
@@ -106,7 +109,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               ),
               _buildProfileOption(
-                  Icons.notifications, "Notifications", themeProvider),
+                  Icons.notifications, "Notifications", themeProvider,
+                  onTap: () {
+                print('1111111111111111111111111111111111111111111111111');
+                print(_profileImage);
+              }),
               _buildProfileOption(Icons.security, "Security", themeProvider),
               _buildProfileOption(Icons.language, "Language", themeProvider,
                   trailingText: "English (US)"),

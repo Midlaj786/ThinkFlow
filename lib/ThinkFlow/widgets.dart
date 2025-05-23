@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -156,6 +157,27 @@ void showImageDialog(BuildContext context, String imageUrl) {
     },
   );
 }
+Future<File?> compressImage(File file, {int quality = 70}) async {
+  try {
+    final filePath = file.absolute.path;
+
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
+    final split = filePath.substring(0, lastIndex);
+    final outPath = "${split}_out${filePath.substring(lastIndex)}";
+
+    final compressedXFile = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: quality,
+    );
+
+    return compressedXFile != null ? File(compressedXFile.path) : null;
+  } catch (e) {
+    print("❌ Compression failed: $e");
+    return null;
+  }
+}
+
 
 // Future<dynamic> pickAndCropImage() async {
 //   final ImagePicker picker = ImagePicker();

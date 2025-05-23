@@ -173,6 +173,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       // deleteCollection('chats');
                       // deleteCollection('messages');
                       // deleteCollection("mentors");
+                      // deleteAllFromCollection('messsages');
+
                     },
                     child: const CircleAvatar(
                       radius: 22,
@@ -266,5 +268,18 @@ void fetchUserData() async {
     print("User Data: ${userDoc.data()}"); // ✅ Check if data is retrieved
   } else {
     print("No user data found"); // ❌ Indicates missing data in Firestore
+  }
+}
+
+
+Future<void> deleteAllFromCollection(String collectionName) async {
+  final collection = FirebaseFirestore.instance.collection(collectionName);
+
+  // Get all documents in the collection
+  final snapshots = await collection.get();
+
+  // Delete each document
+  for (var doc in snapshots.docs) {
+    await doc.reference.delete();
   }
 }

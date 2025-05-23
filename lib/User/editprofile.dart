@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,34 +12,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:thinkflow/ThinkFlow/Theme.dart';
 import 'package:thinkflow/ThinkFlow/widgets.dart';
-
-Future<File?> cropImage(File imageFile) async {
-  CroppedFile? croppedFile = await ImageCropper().cropImage(
-    sourcePath: imageFile.path,
-    aspectRatioPresets: [
-      CropAspectRatioPreset.square,
-      CropAspectRatioPreset.ratio3x2,
-      CropAspectRatioPreset.original,
-      CropAspectRatioPreset.ratio4x3,
-      CropAspectRatioPreset.ratio16x9,
-    ],
-    uiSettings: [
-      AndroidUiSettings(
-        toolbarTitle: 'Crop Image',
-        toolbarColor: Colors.orange,
-        toolbarWidgetColor: Colors.white,
-        lockAspectRatio: false,
-      ),
-      IOSUiSettings(
-        title: 'Crop Image',
-        minimumAspectRatio: 1.0,
-      ),
-    ],
-  );
-
-  // ✅ Return file only if cropping is successful
-  return croppedFile != null ? File(croppedFile.path) : null;
-}
 
 class EditProfilePage extends StatefulWidget {
   EditProfilePage({super.key});
@@ -51,7 +25,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _phoneController = TextEditingController();
   String _selectedGender = "Male";
   DateTime? _selectedDob;
-  String profileImageUrl = "";
+  String imageUrl = "";
   bool _isLoading = false;
   File? _image;
   dynamic selectedImage;
@@ -60,6 +34,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     _fetchUserData();
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? returnImage =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (returnImage == null) return;
+    if (kIsWeb) {
+      Uint8List imageBytes = await returnImage.readAsBytes();
+      setState(() {
+        selectedImage = imageBytes;
+      });
+    } else {
+      setState(() {
+        _image = File(returnImage.path);
+      });
+    }
   }
 
   Future<void> _fetchUserData() async {
@@ -75,11 +67,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
           _nameController.text = userDoc['name'] ?? "";
           _phoneController.text = userDoc['phone'] ?? "";
           _selectedGender = userDoc['gender'] ?? "Male";
-          profileImageUrl = userDoc['profileimg'] ?? "";
-          _selectedDob =
-              userDoc['dob'] != null ? DateTime.parse(userDoc['dob']) : null;
+          imageUrl = userDoc['profileimg'] ?? "";
+          final dobString = userDoc['dob'];
+          if (dobString != null && dobString is String) {
+            try {
+              _selectedDob = DateFormat('dd/MM/yyyy').parse(dobString);
+            } catch (e) {
+              _selectedDob = null;
+            }
+          }
         });
       }
+      print(imageUrl);
+      print('################');
     }
   }
 
@@ -88,19 +88,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      String imageUrl = profileImageUrl; // Keep old image if not updated
-      final FirebaseStorage storage =
-          FirebaseStorage.instanceFor(bucket: "gs://thinkflow");
-      if (selectedImage != null) {
-        final ref = storage.ref().child(
-            "users_profile/${DateTime.now().microsecondsSinceEpoch}.jpg");
-        UploadTask uploadTask = ref.putData(
-            selectedImage, SettableMetadata(contentType: 'image/jpeg'));
-        TaskSnapshot taskSnapshot = await uploadTask;
-        imageUrl = await taskSnapshot.ref.getDownloadURL();
+      final key = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      // Upload image to S3
+      if (_image != null) {
+        File? compressedFile = await compressImage(_image!);
+
+        final UploadFileResult result = await Amplify.Storage.uploadFile(
+          local: compressedFile ?? _image!,
+          key: key,
+        );
+
+        // Get the download URL
+        // final GetUrlResult urlResult =
+        //     await Amplify.Storage.getUrl(key: result.key);
+        // imageUrl = urlResult.url;
       }
+      imageUrl =
+          "https://thinkflowimages36926-dev.s3.us-east-1.amazonaws.com/public/$key";
+      print('#########@@@@@@@@@@########');
+      print(imageUrl);
       await FirebaseFirestore.instance
-          .collection('mentors')
+          .collection('users')
           .doc(user.uid)
           .update({
         'profileimg': imageUrl,
@@ -112,12 +121,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'name': _nameController.text,
         'phone': _phoneController.text,
         'gender': _selectedGender,
-        'dob': _selectedDob != null ? _selectedDob!.toIso8601String() : null,
+        'dob': _selectedDob != null
+            ? DateFormat('yyyy-MM-dd').format(_selectedDob!)
+            : null,
         'profileimg': imageUrl,
       });
 
       setState(() {
-        profileImageUrl = imageUrl;
+        imageUrl = imageUrl;
         selectedImage = null;
         _isLoading = false;
       });
@@ -125,28 +136,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Profile Updated Successfully!")),
       );
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile == null) return; // No image selected
-
-    if (kIsWeb) {
-      Uint8List imageBytes = await pickedFile.readAsBytes();
-      setState(() {
-        selectedImage = imageBytes;
-      });
-    } else {
-      File imageFile = File(pickedFile.path);
-      File? croppedFile = await cropImage(imageFile); // ✅ Use global function
-      if (croppedFile != null) {
-        setState(() {
-          _image = croppedFile;
-        });
-      }
     }
   }
 
@@ -199,12 +188,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ? MemoryImage(selectedImage!) as ImageProvider
                                 : (_image != null
                                     ? FileImage(_image!) as ImageProvider
-                                    : (profileImageUrl.isNotEmpty
-                                        ? NetworkImage(profileImageUrl)
+                                    : (imageUrl.isNotEmpty
+                                        ? NetworkImage(imageUrl)
                                         : null)),
                             child: (selectedImage == null &&
                                     _image == null &&
-                                    profileImageUrl.isEmpty)
+                                    imageUrl.isEmpty)
                                 ? Icon(Icons.person,
                                     size: 50, color: Colors.white)
                                 : null,

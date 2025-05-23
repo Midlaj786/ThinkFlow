@@ -1,3 +1,5 @@
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
@@ -28,7 +30,6 @@ class _CourseUploadState extends State<CourseUpload> {
   String? _imageUrl;
   double _rating = 0.0;
   bool showPriceField = false;
-
 
   List<String> categories = [];
   String selectedCategory = "";
@@ -118,20 +119,19 @@ class _CourseUploadState extends State<CourseUpload> {
           categories.add(finalCategory);
         });
       }
-      final FirebaseStorage storage =
-          FirebaseStorage.instanceFor(bucket: "gs://thinkflow");
 
-      // Upload new image if selected
+      final key = "course_images/${DateTime.now().millisecondsSinceEpoch}.jpg";
       if (selectedImage != null) {
-        final ref = storage.ref().child(
-            "course_images/${DateTime.now().millisecondsSinceEpoch}.jpg");
-        UploadTask uploadTask = ref.putData(
-            selectedImage!, SettableMetadata(contentType: 'image/jpg'));
-
-        TaskSnapshot taskSnapshot = await uploadTask;
-        imageUrl = await taskSnapshot.ref.getDownloadURL();
+        File? compressedImage = await compressImage(selectedImage);
+        final UploadFileResult result = await Amplify.Storage.uploadFile(
+          local: compressedImage ?? File(selectedImage.path),
+          key: key,
+        );
+      
       }
-
+         imageUrl =
+            "https://thinkflowimages36926-dev.s3.us-east-1.amazonaws.com/public/$key";
+       
       if (widget.courseId == null) {
         // **Create a new course**
         await _firestore.collection('courses').add({
@@ -212,7 +212,9 @@ class _CourseUploadState extends State<CourseUpload> {
                     borderRadius: BorderRadius.circular(10),
                     image: selectedImage != null
                         ? DecorationImage(
-                            image: MemoryImage(selectedImage!),
+                            image:kIsWeb
+                            ? MemoryImage(selectedImage as Uint8List)
+                            : FileImage(selectedImage as File) as ImageProvider,
                             fit: BoxFit.cover,
                           )
                         : _imageUrl != null
