@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/administration/admincourse.dart';
-import 'package:thinkflow/ThinkFlow/administration/adminmentor.dart';
+import 'package:thinkflow/thinkflow/administration/admincourse.dart';
+import 'package:thinkflow/thinkflow/administration/adminmentor.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});

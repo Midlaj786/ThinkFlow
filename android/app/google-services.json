@@ -12,7 +12,20 @@
           "package_name": "com.example.thinkflow"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "695452556806-9ggmnrqj9pna1c0vcbjt63d04qaspice.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.thinkflow",
+            "certificate_hash": "706dd2509790dd70524069a16218ef5cc0630f4c"
+          }
+        },
+        {
+          "client_id": "695452556806-ufn87hnr6hs6anrp4vjod032np68da2s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBLJb5V-n03aV1kOPWYCmhlHw_WxAJ27f0"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695452556806-ufn87hnr6hs6anrp4vjod032np68da2s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "695452556806-bprfflftid4nmd5hs6mdq3977bqqr7l1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.thinkflow"
+              }
+            }
+          ]
         }
       }
     }

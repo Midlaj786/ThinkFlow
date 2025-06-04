@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:thinkflow/ThinkFlow/password.dart';
-import 'package:thinkflow/ThinkFlow/widgets.dart';
+import 'package:thinkflow/thinkflow/user/auth/password.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});

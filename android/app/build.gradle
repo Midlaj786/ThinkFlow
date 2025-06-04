@@ -28,20 +28,25 @@ if (flutterVersionName == null) {
 
 android {
     namespace = "com.example.thinkflow"
-    compileSdk = flutter.compileSdkVersion
+    compileSdkVersion 34
     ndkVersion = flutter.ndkVersion
 
-    compileOptions {
-         sourceCompatibility = JavaVersion.VERSION_11
-         targetCompatibility = JavaVersion.VERSION_11
-    }
+   compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+}
+
+    dependencies {
+    implementation 'com.android.support:multidex:1.0.3'
+}
 
     defaultConfig {
         applicationId = "com.example.thinkflow"
         minSdkVersion 23
-        targetSdk = flutter.targetSdkVersion
+        targetSdkVersion 34
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {

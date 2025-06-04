@@ -10,9 +10,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/materialuplode.dart';
-import 'package:thinkflow/ThinkFlow/widgets.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/Mentor/materialuplode.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 
 class CourseUpload extends StatefulWidget {
   final String? courseId;
@@ -34,7 +34,7 @@ class _CourseUploadState extends State<CourseUpload> {
   List<String> categories = [];
   String selectedCategory = "";
   bool isTypingCategory = false;
-
+final _formKey = GlobalKey<FormState>();
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -101,82 +101,89 @@ class _CourseUploadState extends State<CourseUpload> {
     }
   }
 
-  /// **Upload or Update Course**
   Future<void> _saveCourse() async {
-    try {
-      String uid = _auth.currentUser?.uid ?? "";
-      String imageUrl = _imageUrl ?? "";
-      String finalCategory = _categoryController.text.trim();
+  if (!_formKey.currentState!.validate()) return;
 
-      if (finalCategory.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please enter a category!")),
-        );
-        return;
-      }
-      if (!categories.contains(finalCategory)) {
-        setState(() {
-          categories.add(finalCategory);
-        });
-      }
+  try {
+    String uid = _auth.currentUser?.uid ?? "";
+    String finalCategory = _categoryController.text.trim();
 
-      final key = "course_images/${DateTime.now().millisecondsSinceEpoch}.jpg";
-      if (selectedImage != null) {
-        File? compressedImage = await compressImage(selectedImage);
-        final UploadFileResult result = await Amplify.Storage.uploadFile(
-          local: compressedImage ?? File(selectedImage.path),
-          key: key,
-        );
-      
-      }
-         imageUrl =
-            "https://thinkflowimages36926-dev.s3.us-east-1.amazonaws.com/public/$key";
-       
-      if (widget.courseId == null) {
-        // **Create a new course**
-        await _firestore.collection('courses').add({
-          'uid': uid,
-          'category': finalCategory,
-          'name': _nameController.text,
-          'price': _priceController.text,
-          'offerPrice': _offerPriceController.text,
-          'rating': _rating,
-          'imageUrl': imageUrl,
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Course Uploaded!")),
-        );
-      } else {
-        // **Update existing course**
-        await _firestore.collection('courses').doc(widget.courseId).update({
-          'category': finalCategory,
-          'name': _nameController.text,
-          'price': _priceController.text,
-          'offerPrice': _offerPriceController.text,
-          'rating': _rating,
-          'imageUrl': imageUrl,
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Course Updated!")),
-        );
-      }
-
-      // Close page after saving
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UploadVideosPage(
-              courseId: widget.courseId ?? '',
-            ),
-          ));
-    } catch (e) {
+    if (finalCategory.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
+        SnackBar(content: Text("Please enter a category!")),
+      );
+      return;
+    }
+
+    if (!categories.contains(finalCategory)) {
+      setState(() {
+        categories.add(finalCategory);
+      });
+    }
+
+    // Define key outside conditional block
+    final key = "course_images/${DateTime.now().millisecondsSinceEpoch}.jpg";
+    String imageUrl = _imageUrl ?? "";
+
+    // Upload to AWS only if a new image is selected
+    if (selectedImage != null) {
+      File? compressedImage = await compressImage(selectedImage);
+      final UploadFileResult result = await Amplify.Storage.uploadFile(
+        local: compressedImage ?? selectedImage!,
+        key: key,
+      );
+
+      // Assign imageUrl after successful upload
+      imageUrl =
+          "https://thinkflowimages36926-dev.s3.us-east-1.amazonaws.com/public/$key";
+    }
+
+    // Save new or updated course
+    if (widget.courseId == null) {
+      await _firestore.collection('courses').add({
+        'uid': uid,
+        'category': finalCategory,
+        'name': _nameController.text,
+        'price': _priceController.text,
+        'offerPrice': _offerPriceController.text,
+        'rating': _rating,
+        'imageUrl': imageUrl,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Course Uploaded!")),
+      );
+    } else {
+      await _firestore.collection('courses').doc(widget.courseId).update({
+        'category': finalCategory,
+        'name': _nameController.text,
+        'price': _priceController.text,
+        'offerPrice': _offerPriceController.text,
+        'rating': _rating,
+        'imageUrl': imageUrl,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Course Updated!")),
       );
     }
+
+    // Navigate to upload videos page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UploadVideosPage(
+          courseId: widget.courseId ?? '',
+        ),
+      ),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $e")),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -191,70 +198,81 @@ class _CourseUploadState extends State<CourseUpload> {
         ),
         title: Text(isEditing ? "Edit Course" : "Upload Course",
             style: TextStyle(color: themeProvider.textColor)),
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: _image == null && _imageUrl == null
-                        ? themeProvider.textColor
-                        : null,
-                    borderRadius: BorderRadius.circular(10),
-                    image: selectedImage != null
-                        ? DecorationImage(
-                            image:kIsWeb
-                            ? MemoryImage(selectedImage as Uint8List)
-                            : FileImage(selectedImage as File) as ImageProvider,
-                            fit: BoxFit.cover,
-                          )
-                        : _imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(_imageUrl!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                  ),
-                  child: selectedImage == null && _imageUrl == null
-                      ? Icon(Icons.add_a_photo,
-                          size: 50, color: themeProvider.backgroundColor)
-                      : null,
+        child: Form(key: _formKey, 
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+              children: [
+                GestureDetector(
+  onTap: _pickImage,
+  child: Container(
+    height: MediaQuery.of(context).size.height * 0.25,
+    width: MediaQuery.of(context).size.width * 0.9,
+    decoration: BoxDecoration(
+      color: selectedImage == null && _imageUrl == null
+          ? themeProvider.isDarkMode ? Colors.grey[800] : Colors.grey[300]
+          : null,
+      borderRadius: BorderRadius.circular(10),
+      image: selectedImage != null
+          ? DecorationImage(
+              image: kIsWeb
+                  ? MemoryImage(selectedImage as Uint8List)
+                  : FileImage(selectedImage as File) as ImageProvider,
+              fit: BoxFit.cover,
+            )
+          : _imageUrl != null
+              ? DecorationImage(
+                  image: NetworkImage(_imageUrl!),
+                  fit: BoxFit.cover,
+                )
+              : null,
+    ),
+    child: selectedImage == null && _imageUrl == null
+        ? Center(
+            child: Icon(
+              Icons.add_a_photo,
+              size: 40,
+              color: themeProvider.isDarkMode
+                  ? Colors.white70
+                  : Colors.black54,
+            ),
+          )
+        : null,
+  ),
+),
+
+                SizedBox(height: 10),
+          
+                // Category Search Field
+                _buildCategorySearchField(themeProvider),
+          
+                _buildTextField("Course Name", _nameController, themeProvider),
+                _buildTextField("Price", _priceController, themeProvider,
+                    isNumber: true),
+                _buildTextField(
+                    "Offer Price", _offerPriceController, themeProvider,
+                    isNumber: true),
+                SizedBox(height: 10),
+                Text("Rate this Course",
+                    style:
+                        TextStyle(fontSize: 16, color: themeProvider.textColor)),
+                _buildRatingBar(themeProvider),
+                SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    CircularProgressIndicator();
+                    _saveCourse();
+                  },
+                  child: buildContinueButton(
+                      isEditing ? "Update Course" : "Submit Course", context),
                 ),
-              ),
-              SizedBox(height: 10),
-
-              // Category Search Field
-              _buildCategorySearchField(themeProvider),
-
-              _buildTextField("Course Name", _nameController, themeProvider),
-              _buildTextField("Price", _priceController, themeProvider,
-                  isNumber: true),
-              _buildTextField(
-                  "Offer Price", _offerPriceController, themeProvider,
-                  isNumber: true),
-              SizedBox(height: 10),
-              Text("Rate this Course",
-                  style:
-                      TextStyle(fontSize: 16, color: themeProvider.textColor)),
-              _buildRatingBar(themeProvider),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  _saveCourse();
-                },
-                child: buildContinueButton(
-                    isEditing ? "Update Course" : "Submit Course", context),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -286,8 +304,15 @@ class _CourseUploadState extends State<CourseUpload> {
           fieldViewBuilder:
               (context, controller, focusNode, onEditingComplete) {
             controller.text = _categoryController.text; // Keep previous value
-            return TextField(
+            return TextFormField(
               controller: _categoryController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a category';
+                }
+                return null;
+              },
+              style: TextStyle(color: themeProvider.textColor),
               focusNode: focusNode,
               onEditingComplete: onEditingComplete,
               onChanged: (value) {
@@ -296,11 +321,13 @@ class _CourseUploadState extends State<CourseUpload> {
                 });
               },
               decoration: InputDecoration(
+                
                 labelText: "Course Category",
-                filled: true,
-                fillColor: themeProvider.isDarkMode
-                    ? Colors.grey[500]
-                    : Colors.grey[100],
+                labelStyle: TextStyle(color: themeProvider.textColor),
+                // filled: true,
+                // fillColor: themeProvider.isDarkMode
+                //     ? Colors.grey[500]
+                //     : Colors.grey[100],
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -323,20 +350,28 @@ class _CourseUploadState extends State<CourseUpload> {
     IconData? prefixIcon,
     IconData? suffixIcon,
     VoidCallback? onSuffixTap,
+    String? hint
   }) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.0),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter $hintText';
+          }
+          return null;
+        },
+        style: TextStyle(color: themeProvider.textColor),
         focusNode: focusNode,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
         maxLines: maxLines,
         onEditingComplete: onEditingComplete,
         onChanged: onChanged,
         decoration: InputDecoration(
-          fillColor:
-              themeProvider.isDarkMode ? Colors.grey[500] : Colors.grey[100],
-          filled: true,
+          // fillColor:
+          //     themeProvider.isDarkMode ? Colors.grey[500] : Colors.grey[100],
+          // filled: true,
           labelText: hintText,
           labelStyle: TextStyle(color: themeProvider.textColor),
           border: OutlineInputBorder(
@@ -352,25 +387,24 @@ class _CourseUploadState extends State<CourseUpload> {
   }
 
   Widget _buildRatingBar(ThemeProvider themeProvider) {
-    return Column(
-      children: [
-        RatingBar.builder(
-          initialRating: _rating,
-          minRating: 1,
-          direction: Axis.horizontal,
-          allowHalfRating: true,
-          itemCount: 5,
-          itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          itemBuilder: (context, _) => Icon(Icons.star, color: Colors.amber),
-          unratedColor:
-              themeProvider.isDarkMode ? Colors.grey[700] : Colors.grey[400],
-          onRatingUpdate: (rating) {
-            setState(() {
-              _rating = rating;
-            });
-          },
-        ),
-      ],
-    );
-  }
+  return RatingBar.builder(
+    initialRating: _rating,
+    minRating: 0,
+    direction: Axis.horizontal,
+    allowHalfRating: true,
+    itemCount: 5,
+    itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+    unratedColor: Colors.grey[700], // 👈 more visible in dark mode
+    itemBuilder: (context, _) => Icon(
+      Icons.star,
+      color: Colors.amber,
+    ),
+    onRatingUpdate: (rating) {
+      setState(() {
+        _rating = rating;
+      });
+    },
+  );
+}
+
 }

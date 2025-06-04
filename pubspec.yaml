@@ -39,7 +39,7 @@ dependencies:
   amplify_auth_cognito:
   amplify_storage_s3: 
   amplify_core: ^0.5.1
-  firebase_core: ^3.11.0
+  firebase_core:
   font_awesome_flutter: ^10.8.0
   image_picker: ^1.1.2
   google_sign_in: ^6.2.2
@@ -60,8 +60,11 @@ dependencies:
   video_player: ^2.9.5
   agora_rtc_engine: ^6.5.1
   permission_handler: ^11.3.1
-  firebase_database: ^11.3.5
+  firebase_database: ^11.3.6
   flutter_image_compress: ^2.4.0
+  emailjs: ^4.0.0
+  
+  
  
   
 

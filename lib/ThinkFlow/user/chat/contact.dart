@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/User/chat.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/user/chat/chat.dart';
 
 class ContactScreen extends StatefulWidget {
   ContactScreen({super.key});
@@ -24,7 +24,7 @@ class _ContactScreenState extends State<ContactScreen> {
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeProvider.textColor),

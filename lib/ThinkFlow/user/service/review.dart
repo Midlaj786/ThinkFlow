@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/ThinkFlow/widgets.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 
 class ReviewPage extends StatefulWidget {
   final String courseId;

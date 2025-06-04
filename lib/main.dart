@@ -4,9 +4,9 @@ import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/User/login.dart';
-import 'package:thinkflow/User/splashscreen.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/user/auth/login.dart';
+import 'package:thinkflow/thinkflow/user/widgets/splashscreen.dart';
 import 'package:thinkflow/amplifyconfiguration.dart';
 import 'package:thinkflow/firebase_options.dart';
 

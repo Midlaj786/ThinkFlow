@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-
-import 'package:thinkflow/ThinkFlow/course.dart'; // Adjust path if needed
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/mentor/course.dart';
 
 class CourseSearch extends StatefulWidget {
   @override
@@ -46,7 +45,7 @@ List<DocumentSnapshot> _allCourses = [];
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeProvider.textColor),

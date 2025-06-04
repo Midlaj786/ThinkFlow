@@ -2,12 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/ThinkFlow/administration/onlinecall.dart';
-import 'package:thinkflow/ThinkFlow/administration/payment.dart';
-import 'package:thinkflow/ThinkFlow/course.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/courseuplode.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/registration.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/administration/payment.dart';
+import 'package:thinkflow/thinkflow/Mentor/courseuplode.dart';
+import 'package:thinkflow/thinkflow/Mentor/registration.dart';
+import 'package:thinkflow/thinkflow/mentor/course.dart';
 
 class MentorProfile extends StatefulWidget {
   final String mentorId;
@@ -31,27 +30,27 @@ class _MentorProfileState extends State<MentorProfile> {
   void initState() {
     super.initState();
     _fetchMentorDetails();
-    _setupMeetingListener();
+    // _setupMeetingListener();
   }
 
-  void _setupMeetingListener() {
-    FirebaseFirestore.instance
-        .collection('mentors')
-        .doc(widget.mentorId)
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.exists) {
-        final data = snapshot.data() as Map<String, dynamic>;
-        setState(() {
-          isMeetingLive = data['isLive'] ?? false;
-          meetingChannelName = data['channelName'];
-          meetingStatus = isMeetingLive 
-              ? "Meeting is live!" 
-              : "No active meeting";
-        });
-      }
-    });
-  }
+  // void _setupMeetingListener() {
+  //   FirebaseFirestore.instance
+  //       .collection('mentors')
+  //       .doc(widget.mentorId)
+  //       .snapshots()
+  //       .listen((snapshot) {
+  //     if (snapshot.exists) {
+  //       final data = snapshot.data() as Map<String, dynamic>;
+  //       setState(() {
+  //         isMeetingLive = data['isLive'] ?? false;
+  //         meetingChannelName = data['channelName'];
+  //         meetingStatus = isMeetingLive 
+  //             ? "Meeting is live!" 
+  //             : "No active meeting";
+  //       });
+  //     }
+  //   });
+  // }
 
   // Future<void> toggleMeeting() async {
   //   final docRef = FirebaseFirestore.instance.collection('mentors').doc(widget.mentorId);
@@ -124,7 +123,7 @@ class _MentorProfileState extends State<MentorProfile> {
                         context,
                         MaterialPageRoute(builder: (context) => CourseUpload()),
                       );
-                    } else if (value == 'add_bank_account') {
+                    } else if (value == 'add_poster') {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -137,8 +136,8 @@ class _MentorProfileState extends State<MentorProfile> {
                     const PopupMenuItem(
                         value: 'add_course', child: Text('Add Course')),
                     const PopupMenuItem(
-                        value: 'add_bank_account',
-                        child: Text('Add Bank Account')),
+                        value: 'add_poster', child: Text('Add Poster')),
+                       
                   ],
                 )
               ]

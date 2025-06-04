@@ -1,1 +1,41 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"thinkflow-1b602","appId":"1:695452556806:android:bfd46027604ac6a719ad87","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"thinkflow-1b602","configurations":{"android":"1:695452556806:android:bfd46027604ac6a719ad87","ios":"1:695452556806:ios:b7dc150b0e0ca75c19ad87","macos":"1:695452556806:ios:b7dc150b0e0ca75c19ad87","web":"1:695452556806:web:d5e407e4c9e5c4a119ad87","windows":"1:695452556806:web:cc1bb53d92ede7d619ad87"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "thinkflow-1b602",
+          "appId": "1:695452556806:android:bfd46027604ac6a719ad87",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "thinkflow-1b602",
+          "configurations": {
+            "android": "1:695452556806:android:bfd46027604ac6a719ad87",
+            "ios": "1:695452556806:ios:b7dc150b0e0ca75c19ad87",
+            "macos": "1:695452556806:ios:b7dc150b0e0ca75c19ad87",
+            "web": "1:695452556806:web:d5e407e4c9e5c4a119ad87",
+            "windows": "1:695452556806:web:cc1bb53d92ede7d619ad87"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ]
+}

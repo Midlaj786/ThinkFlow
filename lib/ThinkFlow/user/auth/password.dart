@@ -1,14 +1,8 @@
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:thinkflow/ThinkFlow/auth.dart';
-import 'package:thinkflow/ThinkFlow/bottomNav.dart';
-import 'package:thinkflow/User/home.dart';
-import 'package:thinkflow/User/signUp.dart';
-import 'package:thinkflow/ThinkFlow/widgets.dart';
-
+import 'package:thinkflow/thinkflow/user/auth/auth.dart';
+import 'package:thinkflow/thinkflow/user/auth/signUp.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 class PasswordScreen extends StatefulWidget {
   final String emailId;
 

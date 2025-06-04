@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thinkflow/ThinkFlow/bottomNav.dart';
 import 'dart:async';
-import 'package:thinkflow/User/login.dart';
+import 'package:thinkflow/thinkflow/user/auth/login.dart';
+import 'package:thinkflow/thinkflow/user/widgets/bottomNav.dart';
 
 class SplashScreen extends StatefulWidget {
   @override

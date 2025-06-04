@@ -10,8 +10,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/ThinkFlow/widgets.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
+
 
 class EditProfilePage extends StatefulWidget {
   EditProfilePage({super.key});
@@ -25,7 +26,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _phoneController = TextEditingController();
   String _selectedGender = "Male";
   DateTime? _selectedDob;
-  String imageUrl = "";
+  String _imageUrl = "";
   bool _isLoading = false;
   File? _image;
   dynamic selectedImage;
@@ -67,7 +68,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           _nameController.text = userDoc['name'] ?? "";
           _phoneController.text = userDoc['phone'] ?? "";
           _selectedGender = userDoc['gender'] ?? "Male";
-          imageUrl = userDoc['profileimg'] ?? "";
+          _imageUrl = userDoc['profileimg'] ?? "";
           final dobString = userDoc['dob'];
           if (dobString != null && dobString is String) {
             try {
@@ -78,8 +79,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           }
         });
       }
-      print(imageUrl);
-      print('################');
+     
     }
   }
 
@@ -88,6 +88,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
+       String imageUrl = _imageUrl;
       final key = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
       // Upload image to S3
@@ -106,8 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
       imageUrl =
           "https://thinkflowimages36926-dev.s3.us-east-1.amazonaws.com/public/$key";
-      print('#########@@@@@@@@@@########');
-      print(imageUrl);
+     
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -161,7 +161,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeProvider.textColor),
@@ -188,12 +188,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 ? MemoryImage(selectedImage!) as ImageProvider
                                 : (_image != null
                                     ? FileImage(_image!) as ImageProvider
-                                    : (imageUrl.isNotEmpty
-                                        ? NetworkImage(imageUrl)
+                                    : (_imageUrl.isNotEmpty
+                                        ? NetworkImage(_imageUrl)
                                         : null)),
                             child: (selectedImage == null &&
                                     _image == null &&
-                                    imageUrl.isEmpty)
+                                    _imageUrl.isEmpty)
                                 ? Icon(Icons.person,
                                     size: 50, color: Colors.white)
                                 : null,

@@ -3,20 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/mentorview.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/ThinkFlow/administration/admin.dart';
-import 'package:thinkflow/ThinkFlow/course.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/courseuplode.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/registration.dart';
-import 'package:thinkflow/User/login.dart';
+import 'package:thinkflow/thinkflow/Mentor/mentorview.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/administration/admin.dart';
+import 'package:thinkflow/thinkflow/Mentor/courseuplode.dart';
+import 'package:thinkflow/thinkflow/Mentor/registration.dart';
 
-import 'package:thinkflow/ThinkFlow/Mentor/mentprof.dart';
-import 'package:thinkflow/User/searchcourse.dart';
-
-import 'package:thinkflow/ThinkFlow/searchmentor.dart';
-// import 'package:thinkflow/ThinkFlow/all_courses.dart'; // Add a page for displaying all courses
-
+import 'package:thinkflow/thinkflow/Mentor/mentprof.dart';
+import 'package:thinkflow/thinkflow/mentor/course.dart';
+import 'package:thinkflow/thinkflow/user/auth/login.dart';
+import 'package:thinkflow/thinkflow/user/service/searchcourse.dart';
+import 'package:thinkflow/thinkflow/user/service/searchmentor.dart';
 class HomePageScreen extends StatefulWidget {
   HomePageScreen({super.key});
 
@@ -394,19 +391,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
   }
 }
 
-Widget _buildPlaceholder(ThemeProvider themeProvider) {
-  return Container(
-    height: 100,
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: Colors.grey[300], // Placeholder color
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-    ),
-    child: Center(
-      child: Icon(Icons.image, color: Colors.grey[600], size: 40),
-    ),
-  );
-}
+
 
 
 Widget _buildCourseCard(
@@ -423,8 +408,8 @@ Widget _buildCourseCard(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(12),
       color: Colors.white,
-      boxShadow: [
-        const BoxShadow(
+      boxShadow: const [
+        BoxShadow(
           color: Colors.black12,
           blurRadius: 6,
           spreadRadius: 2,

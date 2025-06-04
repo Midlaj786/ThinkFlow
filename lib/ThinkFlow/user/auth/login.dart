@@ -2,12 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:thinkflow/ThinkFlow/auth.dart';
-import 'package:thinkflow/ThinkFlow/bottomNav.dart';
-import 'package:thinkflow/ThinkFlow/emailvrfy.dart';
-import 'package:thinkflow/User/home.dart';
-import 'package:thinkflow/User/signUp.dart';
-import '../ThinkFlow/widgets.dart';
+import 'package:thinkflow/thinkflow/user/auth/auth.dart';
+import 'package:thinkflow/thinkflow/user/auth/emailvrfy.dart';
+import 'package:thinkflow/thinkflow/user/widgets/bottomNav.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,21 +21,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   bool _obscurePassword = true;
   void _handleLogin() async {
-    print('111111111#############');
     if (_formKey.currentState!.validate()) {
-      print('2222222222#############');
       User? result = await _authService.loginWithEmail(
         _emailController.text,
         _passwordController.text,
       );
-      print(result);
-      print('33333333#############');
+
       if (result != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login Successful!")),
         );
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => MainScreen()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MainScreen()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result.toString())),
@@ -46,27 +41,35 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleGoogleLogin() async {
-    String? result = await _authService.signInWithGoogle();
-    if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Google Sign-In Successful!")),
-      );
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => MainScreen()));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result)),
-      );
-    }
-  }
+  // void _handleGoogleLogin() async {
+  //   String? result = await _authService.signInWithGoogle(context);
+  //   print('8888888888888');
+  //   print(result);
+  //   print('8888888888888');
+  //   if (result == null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Google Sign-In Successful!")),
+  //     );
+  //     if (FirebaseAuth.instance.currentUser != null) {
+  //       Navigator.push(context,
+  //           MaterialPageRoute(builder: (context) => const MainScreen()));
+  //     } else {
+  //       Navigator.push(context,
+  //           MaterialPageRoute(builder: (context) => const SignupScreen()));
+  //     }
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text(result)),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFCFAF8),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -151,8 +154,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Google Button
                   GestureDetector(
-                    onTap: () {
-                      _handleGoogleLogin();
+                    onTap: () async {
+                      print('kkkkkkkkkkkkkkkkk');
+                      await _authService.signInWithGoogle(context);
                     },
                     child: const CircleAvatar(
                       radius: 22,
@@ -164,28 +168,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  // const SizedBox(width: 20),
 
-                  GestureDetector(
-                    onTap: () {
-                      fetchUserData();
-                      // deleteAllMessages();
-                      // deleteCollection('chats');
-                      // deleteCollection('messages');
-                      // deleteCollection("mentors");
-                      // deleteAllFromCollection('messsages');
+                  // GestureDetector(
+                  //   onTap: () {
+                  //     fetchUserData();
+                  //     // deleteAllMessages();
+                  //     // deleteCollection('chats');
+                  //     // deleteCollection('messages');
+                  //     // deleteCollection("mentors");
+                  //     // deleteAllFromCollection('messsages');
 
-                    },
-                    child: const CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Colors.blue,
-                      child: Icon(
-                        FontAwesomeIcons.facebook,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                  ),
+                  //   },
+                  //   child: const CircleAvatar(
+                  //     radius: 22,
+                  //     backgroundColor: Colors.blue,
+                  //     child: Icon(
+                  //       FontAwesomeIcons.facebook,
+                  //       color: Colors.white,
+                  //       size: 22,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -198,7 +202,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => EmailVerificationScreen()));
+                              builder: (context) =>
+                                  const EmailVerificationScreen()));
                     },
                     child: const Text(
                       "SIGN UP",
@@ -270,7 +275,6 @@ void fetchUserData() async {
     print("No user data found"); // ❌ Indicates missing data in Firestore
   }
 }
-
 
 Future<void> deleteAllFromCollection(String collectionName) async {
   final collection = FirebaseFirestore.instance.collection(collectionName);

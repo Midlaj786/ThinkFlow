@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Mentor/mentorview.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
+import 'package:thinkflow/thinkflow/Mentor/mentorview.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
 
 class MentorSearch extends StatefulWidget {
   @override
@@ -41,7 +41,7 @@ class _MentorSearchState extends State<MentorSearch> {
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeProvider.textColor),

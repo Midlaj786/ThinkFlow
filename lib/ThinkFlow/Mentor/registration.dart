@@ -7,9 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/ThinkFlow/widgets.dart';
-
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 class MentorLoginPage extends StatefulWidget {
   MentorLoginPage({super.key});
 
@@ -18,6 +17,7 @@ class MentorLoginPage extends StatefulWidget {
 }
 
 class _MentorLoginPageState extends State<MentorLoginPage> {
+   final _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController _professionController = TextEditingController();
   final TextEditingController experienceController = TextEditingController();
@@ -26,6 +26,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
   String? uid;
   dynamic selectedImage;
   File? _image;
+  String email = '';
   String profileImageUrl = '';
   String selectedProfession = "";
   bool isTypinProfession = false;
@@ -97,6 +98,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
         experienceController.text = mentorDoc["experience"] ?? "";
         skillsController.text = mentorDoc["skills"] ?? "";
         profileImageUrl = mentorDoc["profileimg"] ?? "";
+        email = mentorDoc["email"] ?? "";
       });
     } else {
       // ❗ Not a mentor - load only basic user info
@@ -107,26 +109,19 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
         setState(() {
           nameController.text = userDoc["name"] ?? "";
           profileImageUrl = userDoc["profileimg"] ?? "";
+          email = userDoc["email"] ?? "";
         });
       }
     }
   }
 
   void submitMentorDetails(BuildContext context) async {
+     if (!_formKey.currentState!.validate()) return;
     if (uid == null) return;
 
     // String imageUrl = profileImageUrl;
     String finalProfession = _professionController.text;
-    if (nameController.text.trim().isEmpty ||
-        _professionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill in both Name and Profession."),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    
     String imageUrl = profileImageUrl;
 
     
@@ -152,12 +147,13 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
       "skills": skillsController.text,
       "uid": uid,
       "profileimg": imageUrl,
+      "email": email,
     };
 
-    await FirebaseFirestore.instance.collection("users").doc(uid).update({
-      "name": nameController.text,
-      "profileimg": imageUrl,
-    });
+    // await FirebaseFirestore.instance.collection("users").doc(uid).update({
+    //   "name": nameController.text,
+    //   "profileimg": imageUrl,
+    // });
     if (isExistingMentor) {
       await FirebaseFirestore.instance
           .collection("mentors")
@@ -173,6 +169,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Mentor details updated successfully!")),
     );
+    Navigator.pop(context);
   }
 
   @override
@@ -182,6 +179,7 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
+        backgroundColor: themeProvider.backgroundColor,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeProvider.textColor),
           onPressed: () {
@@ -196,160 +194,166 @@ class _MentorLoginPageState extends State<MentorLoginPage> {
             color: themeProvider.textColor,
           ),
         ),
-        backgroundColor: Colors.transparent,
+       
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Stack(children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey.shade300,
-                    backgroundImage: selectedImage != null
-                        ? MemoryImage(selectedImage!) as ImageProvider
-                        : (_image != null
-                            ? FileImage(_image!) as ImageProvider
-                            : (profileImageUrl.isNotEmpty
-                                ? NetworkImage(profileImageUrl)
-                                : null)),
-                    child: (selectedImage == null &&
-                            _image == null &&
-                            profileImageUrl.isEmpty)
-                        ? Icon(Icons.person, size: 50, color: Colors.white)
-                        : null,
+        child: Form(key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Stack(children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage: selectedImage != null
+                          ? MemoryImage(selectedImage!) as ImageProvider
+                          : (_image != null
+                              ? FileImage(_image!) as ImageProvider
+                              : (profileImageUrl.isNotEmpty
+                                  ? NetworkImage(profileImageUrl)
+                                  : null)),
+                      child: (selectedImage == null &&
+                              _image == null &&
+                              profileImageUrl.isEmpty)
+                          ? Icon(Icons.person, size: 50, color: Colors.white)
+                          : null,
+                    ),
+                    Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.orange,
+                          child: IconButton(
+                            onPressed: () {
+                              _pickImage();
+                            },
+                            icon:
+                                const Icon(Icons.camera_alt, color: Colors.white),
+                          ),
+                        )),
+                  ]),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isExistingMentor
+                      ? 'Update Your Mentor Profile'
+                      : 'Become a Mentor',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.orange,
                   ),
-                  Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.orange,
-                        child: IconButton(
-                          onPressed: () {
-                            _pickImage();
-                          },
-                          icon:
-                              const Icon(Icons.camera_alt, color: Colors.white),
-                        ),
-                      )),
-                ]),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                isExistingMentor
-                    ? 'Update Your Mentor Profile'
-                    : 'Become a Mentor',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.orange,
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: themeProvider.isDarkMode
-                      ? Colors.grey[500]
-                      : Colors.grey[100],
-                  labelText: 'Full Name',
-                  labelStyle: TextStyle(color: themeProvider.textColor),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Autocomplete<String>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return professions;
-                      }
-                      return professions.where((category) => category
-                          .toLowerCase()
-                          .contains(textEditingValue.text.toLowerCase()));
-                    },
-                    onSelected: (String selection) {
-                      setState(() {
-                        _professionController.text = selection;
-                        selectedProfession = selection;
-                      });
-                    },
-                    fieldViewBuilder:
-                        (context, controller, focusNode, onEditingComplete) {
-                      controller.text =
-                          _professionController.text; // Keep previous value
-                      return TextField(
-                        controller: _professionController,
-                        focusNode: focusNode,
-                        onEditingComplete: onEditingComplete,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedProfession =
-                                value; // Allow new category input
-                          });
-                        },
-                        decoration: InputDecoration(
-                          labelText: "Profession",
-                          labelStyle: TextStyle(color: themeProvider.textColor),
-                          filled: true,
-                          fillColor: themeProvider.isDarkMode
-                              ? Colors.grey[500]
-                              : Colors.grey[100],
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      );
-                    },
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: nameController,
+                  validator: (value) =>
+                    value == null || value.trim().isEmpty ? 'Full Name is required' : null,
+      
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: themeProvider.isDarkMode
+                        ? Colors.grey[500]
+                        : Colors.grey[100],
+                    labelText: 'Full Name',
+                    labelStyle: TextStyle(color: themeProvider.textColor),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: experienceController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: themeProvider.isDarkMode
-                      ? Colors.grey[500]
-                      : Colors.grey[100],
-                  labelText: 'Years of Experience',
-                  labelStyle: TextStyle(color: themeProvider.textColor),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0)),
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: skillsController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: themeProvider.isDarkMode
-                      ? Colors.grey[500]
-                      : Colors.grey[100],
-                  labelText: 'Skills & Expertise',
-                  labelStyle: TextStyle(color: themeProvider.textColor),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0)),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Center(
-                  child: GestureDetector(
-                      onTap: () {
-                        print('go to mento save');
-                        submitMentorDetails(context);
-                        Navigator.pop(context);
+                const SizedBox(height: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return professions;
+                        }
+                        return professions.where((category) => category
+                            .toLowerCase()
+                            .contains(textEditingValue.text.toLowerCase()));
                       },
-                      child: buildContinueButton("submit", context))),
-            ],
+                      onSelected: (String selection) {
+                        setState(() {
+                          _professionController.text = selection;
+                          selectedProfession = selection;
+                        });
+                      },
+                      fieldViewBuilder:
+                          (context, controller, focusNode, onEditingComplete) {
+                        controller.text =
+                            _professionController.text; // Keep previous value
+                        return TextFormField(
+                          controller: _professionController,
+                          focusNode: focusNode,
+                           validator: (value) =>
+                        value == null || value.trim().isEmpty ? 'Profession is required' : null,
+                   
+                          onEditingComplete: onEditingComplete,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedProfession =
+                                  value; // Allow new category input
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Profession",
+                            labelStyle: TextStyle(color: themeProvider.textColor),
+                            filled: true,
+                            fillColor: themeProvider.isDarkMode
+                                ? Colors.grey[500]
+                                : Colors.grey[100],
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: experienceController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: themeProvider.isDarkMode
+                        ? Colors.grey[500]
+                        : Colors.grey[100],
+                    labelText: 'Years of Experience',
+                    labelStyle: TextStyle(color: themeProvider.textColor),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: skillsController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: themeProvider.isDarkMode
+                        ? Colors.grey[500]
+                        : Colors.grey[100],
+                    labelText: 'Skills & Expertise',
+                    labelStyle: TextStyle(color: themeProvider.textColor),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Center(
+                    child: GestureDetector(
+                        onTap: () => submitMentorDetails(context),
+                          
+                        
+                        child: buildContinueButton("submit", context))),
+              ],
+            ),
           ),
         ),
       ),

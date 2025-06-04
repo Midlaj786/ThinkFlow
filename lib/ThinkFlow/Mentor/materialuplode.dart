@@ -1,18 +1,19 @@
-// Full revised code based on Midlaj's new requirements
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:thinkflow/ThinkFlow/videoplayer.dart';
-import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:thinkflow/amplifyconfiguration.dart';
+import 'package:thinkflow/thinkflow/mentor/course.dart';
+import 'package:thinkflow/thinkflow/user/video/videoplayer.dart';
+import 'package:thinkflow/thinkflow/user/widgets/widgets.dart';
 
 class UploadVideosPage extends StatefulWidget {
   final String courseId;
-  const UploadVideosPage({super.key, required this.courseId});
+  UploadVideosPage({super.key, required this.courseId});
 
   @override
   State<UploadVideosPage> createState() => _UploadVideosPageState();
@@ -22,6 +23,12 @@ class _UploadVideosPageState extends State<UploadVideosPage> {
   List<Map<String, dynamic>> existingVideos = [];
   bool _amplifyConfigured = false;
   bool _isUploading = false;
+  double _uploadProgress = 0.0;
+
+  File? _selectedVideo;
+  TextEditingController _captionController = TextEditingController();
+TextEditingController _titleController = TextEditingController();
+final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -55,63 +62,48 @@ class _UploadVideosPageState extends State<UploadVideosPage> {
           .map<Map<String, dynamic>>((entry) => {
                 'index': entry.key + 1,
                 'url': entry.value['url'],
+                'title': entry.value['title'] ,
                 'caption': entry.value['caption'],
+
               })
           .toList();
     });
   }
 
-  Future<void> _pickAndUploadVideo() async {
+  Future<void> _pickVideo() async {
     FilePickerResult? result =
         await FilePicker.platform.pickFiles(type: FileType.video);
     if (result == null) return;
+    setState(() {
+      _selectedVideo = File(result.files.single.path!);
+    });
+  }
 
-    File file = File(result.files.single.path!);
-    String fileName = result.files.single.name;
+  Future<void> _uploadVideo() async {
+    if (!_formKey.currentState!.validate()) return;
 
-    TextEditingController captionController = TextEditingController();
-    bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Enter Caption'),
-        content: TextField(
-          controller: captionController,
-          decoration: const InputDecoration(hintText: 'Enter caption'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel')),
-          TextButton(
-              onPressed: () {
-                if (captionController.text.trim().isNotEmpty) {
-                  Navigator.of(context).pop(true);
-                }
-              },
-              child: const Text('Upload')),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    String caption = captionController.text.trim();
+    String fileName = _selectedVideo!.path.split('/').last;
     String key =
         "course_videos/${DateTime.now().millisecondsSinceEpoch}_$fileName";
-
+    String caption = _captionController.text.trim();
+String title = _titleController.text.trim();
     try {
-      double progressValue = 0.0;
-      setState(() => _isUploading = true);
+      setState(() {
+        _isUploading = true;
+        _uploadProgress = 0.0;
+      });
 
-      final UploadFileResult result = await Amplify.Storage.uploadFile(
-        local: file,
+      await Amplify.Storage.uploadFile(
+        local: _selectedVideo!,
         key: key,
         onProgress: (progress) {
-          setState(() => progressValue = progress.getFractionCompleted());
+          setState(() {
+            _uploadProgress = progress.getFractionCompleted();
+          });
         },
       );
 
-      final urlResult =
+      String url =
           "https://thinkflowimages36926-dev.s3.us-east-1.amazonaws.com/public/$key";
 
       await FirebaseFirestore.instance
@@ -119,68 +111,226 @@ class _UploadVideosPageState extends State<UploadVideosPage> {
           .doc(widget.courseId)
           .update({
         'videos': FieldValue.arrayUnion([
-          {'url': urlResult, 'caption': caption}
+          {'url': url,'title':title ,'caption': caption}
         ])
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Video uploaded successfully.")),
+        SnackBar(content: Text("Video uploaded successfully.")),
       );
 
+      _captionController.clear();
+      _selectedVideo = null;
       _fetchExistingVideos();
     } catch (e) {
       print("Upload error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Upload failed.")),
+        SnackBar(content: Text("Upload failed.")),
       );
     } finally {
-      setState(() => _isUploading = false);
+      setState(() {
+        _isUploading = false;
+        _uploadProgress = 0.0;
+      });
     }
   }
 
-  Widget _buildExistingVideoCard(Map<String, dynamic> video) {
+  Widget _buildVideoCard(
+      Map<String, dynamic> video, ThemeProvider themeProvider) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
+        contentPadding: EdgeInsets.all(12),
         leading: CircleAvatar(
-          child: Text(video['index'].toString()),
+          radius: 20,
+          backgroundColor: Colors.blueAccent.withOpacity(0.1),
+          child: Text(video['index'].toString(),
+              style: TextStyle(color: Colors.blueAccent)),
         ),
-        title: Text(video['caption'] ?? 'No caption'),
-        subtitle: Text(video['url'], style: const TextStyle(fontSize: 12)),
-        trailing: IconButton(
-          icon: const Icon(Icons.play_circle_fill),
-          onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => CourseVideoPlayer(videoUrl: video['url']),
-            ));
-          },
+        title: Text(
+          video['title'] ,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),subtitle: Text(
+          video['caption'] ?? '',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(),
         ),
+        trailing:
+            Icon(Icons.play_circle_fill, color: Colors.blueAccent, size: 30),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CourseVideoPlayer(
+                courseId: widget.courseId,
+                startIndex: video['index'] - 1,
+                
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Upload Course Videos")),
+      backgroundColor: themeProvider.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: themeProvider.backgroundColor,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: themeProvider.textColor,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Upload Course Videos",
+          style: TextStyle(color: themeProvider.textColor),
+        ),
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            ElevatedButton.icon(
-              onPressed: _isUploading ? null : _pickAndUploadVideo,
-              icon: const Icon(Icons.add),
-              label: const Text("Pick & Upload Video"),
-            ),
-            const SizedBox(height: 20),
-            const Text("Existing Videos",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: existingVideos.length,
-                itemBuilder: (context, index) =>
-                    _buildExistingVideoCard(existingVideos[index]),
+        padding: EdgeInsets.all(16.0),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Form(key:_formKey ,
+                child: Column(
+                  children: [
+                    if (_selectedVideo != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 200,
+                            width: double.infinity,
+                            color: Colors.black12,
+                            child: Center(
+                              child: Text(
+                                "Video selected: ${_selectedVideo!.path.split('/').last}",
+                                style: TextStyle(color: themeProvider.textColor),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                           TextFormField(
+                            controller: _titleController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Title is required';
+                              }
+                              return null;
+                            },
+                            style: TextStyle(color: themeProvider.textColor),
+                            maxLength: 100,
+                            decoration: InputDecoration(
+                              labelText: 'Title',
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: themeProvider.textColor),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          TextFormField(
+                            controller: _captionController,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Caption is required';
+                              }
+                              return null;
+                            },
+                            style: TextStyle(color: themeProvider.textColor),
+                            maxLength: 100,
+                            decoration: InputDecoration(
+                              labelText: 'Caption ',
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: themeProvider.textColor),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: _isUploading ? null : _uploadVideo,
+                            icon: Icon(Icons.cloud_upload),
+                            label: Text("Upload"),
+                          ),
+                          if (_isUploading)
+                            Column(
+                              children: [
+                                SizedBox(height: 8),
+                                LinearProgressIndicator(value: _uploadProgress),
+                                SizedBox(height: 4),
+                                Text(
+                                  "${(_uploadProgress * 100).toStringAsFixed(0)}% uploaded",
+                                  style: TextStyle(color: themeProvider.textColor),
+                                ),
+                                SizedBox(height: 16),
+                              ],
+                            ),
+                        ],
+                      ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Uploaded Videos",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: themeProvider.textColor,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      height: 300,
+                      child: existingVideos.isEmpty
+                          ? Center(
+                              child: Text(
+                                "No videos uploaded yet.",
+                                style: TextStyle(color: themeProvider.textColor),
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: existingVideos.length,
+                              itemBuilder: (context, index) =>
+                                  _buildVideoCard(existingVideos[index], themeProvider),
+                            ),
+                    ),
+                    SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _pickVideo,
+                        icon: Icon(Icons.add),
+                        label: Text("Add Video"),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CourseDetailPage(courseId: widget.courseId),
+                          ),
+                        );
+                      },
+                      child: buildContinueButton("Continue", context),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -189,46 +339,3 @@ class _UploadVideosPageState extends State<UploadVideosPage> {
     );
   }
 }
-
-// class VideoPlayerPage extends StatefulWidget {
-//   final String videoUrl;
-//   const VideoPlayerPage({super.key, required this.videoUrl});
-
-//   @override
-//   State<VideoPlayerPage> createState() => _VideoPlayerPageState();
-// }
-
-// class _VideoPlayerPageState extends State<VideoPlayerPage> {
-//   late VideoPlayerController _controller;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _controller = VideoPlayerController.network(widget.videoUrl)
-//       ..initialize().then((_) {
-//         setState(() {});
-//         _controller.play();
-//       });
-//   }
-
-//   @override
-//   void dispose() {
-//     _controller.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text("Preview Video")),
-//       body: Center(
-//         child: _controller.value.isInitialized
-//             ? AspectRatio(
-//                 aspectRatio: _controller.value.aspectRatio,
-//                 child: VideoPlayer(_controller),
-//               )
-//             : const CircularProgressIndicator(),
-//       ),
-//     );
-//   }
-// }

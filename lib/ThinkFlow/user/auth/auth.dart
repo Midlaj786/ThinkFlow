@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import 'package:thinkflow/thinkflow/user/auth/signUp.dart';
+import 'package:thinkflow/thinkflow/user/widgets/bottomNav.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -96,37 +100,45 @@ class AuthService {
   }
 
   // Google Sign-In
-  Future<String?> signInWithGoogle() async {
+  Future<String?> signInWithGoogle(context) async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return "Google sign-in aborted";
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        final UserCredential usercredential =
+            await FirebaseAuth.instance.signInWithCredential(
+          credential,
+        );
+        final User? user = usercredential.user;
+        if (user != null) {
+          final userEmail = user.email;
+          print(userEmail);
+          // Check if the user exists in Firestore
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
-      String? uid = userCredential.user!.uid;
-
-      // Save Google user details to Firestore (if not already saved)
-      DocumentSnapshot userDoc =
-          await _firestore.collection("users").doc(uid).get();
-      if (!userDoc.exists) {
-        await _firestore.collection("users").doc(uid).set({
-          "firstName": googleUser.displayName ?? "Unknown",
-          "email": googleUser.email,
-          "uid": uid,
-        });
+          if (userDoc.exists) {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => MainScreen()));
+          } else {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SignupScreen()));
+          }
+        }
       }
-
-      return null; // Success
+      return null;
     } catch (e) {
-      return e.toString(); // Return error message
+      return "Google Sign-In Failed: ${e.toString()}";
     }
   }
 

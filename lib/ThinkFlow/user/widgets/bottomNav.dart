@@ -1,11 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart';
-import 'package:thinkflow/User/chat.dart';
-import 'package:thinkflow/User/contact.dart';
-import 'package:thinkflow/User/home.dart';
-import 'package:thinkflow/User/profail.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
+import 'package:thinkflow/thinkflow/user/chat/contact.dart';
+import 'package:thinkflow/thinkflow/user/profile/profail.dart';
+import 'package:thinkflow/thinkflow/user/widgets/home.dart';
+import 'package:thinkflow/thinkflow/user/widgets/savedcours.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,7 +16,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  final List<Widget> _pages = [HomePageScreen(),HomePageScreen(), ContactScreen(),ProfilePage()];
+  final List<Widget> _pages = [HomePageScreen(),SavedCoursesPage(), ContactScreen(),ProfilePage()];
 
   void _onItemTapped(int index) {
     setState(() {

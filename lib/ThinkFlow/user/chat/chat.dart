@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:thinkflow/ThinkFlow/Theme.dart';
+import 'package:thinkflow/thinkflow/Theme.dart';
 
 class ChatScreen extends StatefulWidget {
   final String receiverId;
@@ -93,8 +93,8 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: themeProvider.backgroundColor,
+         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: themeProvider.textColor),
           onPressed: () => Navigator.pop(context),
@@ -164,7 +164,10 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _buildMessageInput(),
+          SafeArea(child: Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: _buildMessageInput(),
+          )),
         ],
       ),
     );
@@ -229,7 +232,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           SizedBox(width: 8),
-          CircleAvatar(
+          CircleAvatar(radius: 24,
             backgroundColor: Colors.orange,
             child: IconButton(
               icon: Icon(Icons.send, color: Colors.white),

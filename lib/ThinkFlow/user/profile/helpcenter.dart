@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thinkflow/ThinkFlow/Theme.dart'; // adjust the path if needed
+import 'package:thinkflow/thinkflow/Theme.dart'; // adjust the path if needed
 
 class HelpCenterPage extends StatelessWidget {
   @override
@@ -11,7 +11,7 @@ class HelpCenterPage extends StatelessWidget {
       backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
         title: Text('Help Center', style: TextStyle(color: themeProvider.textColor)),
-        backgroundColor: Colors.transparent,
+        backgroundColor: themeProvider.backgroundColor,
         elevation: 0,
         iconTheme: IconThemeData(color: themeProvider.textColor),
       ),
